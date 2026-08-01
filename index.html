@@ -1181,70 +1181,6 @@
   }
   .excerpt-remove-btn { color: var(--coral-deep); }
 
-  .export-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 18px;
-  }
-  .export-card {
-    background: var(--card);
-    border: 2px solid var(--line-soft);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    flex-direction: column;
-  }
-  .export-card h3 {
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-weight: 600;
-    font-size: 18px;
-    color: var(--ink);
-    margin-bottom: 6px;
-  }
-  .export-card p {
-    font-size: 13px;
-    color: var(--ink-soft);
-    margin-bottom: 14px;
-    line-height: 1.5;
-  }
-  .export-preview {
-    background: var(--cream);
-    border: 1.5px dashed var(--line);
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-size: 12px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    max-height: 220px;
-    overflow-y: auto;
-    margin-bottom: 14px;
-    color: var(--ink-soft);
-  }
-  .audit-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 320px;
-    overflow-y: auto;
-  }
-  .audit-item {
-    font-size: 12.5px;
-    padding: 9px 12px;
-    border-radius: 10px;
-    background: var(--cream);
-    border-left: 3px solid var(--coral);
-    color: var(--ink);
-  }
-  .audit-item .audit-time {
-    color: var(--ink-mute);
-    font-size: 11px;
-    font-weight: 600;
-    display: block;
-    margin-top: 2px;
-  }
-
   .auth-screen {
     position: fixed;
     inset: 0;
@@ -1392,6 +1328,13 @@
     background: var(--rose);
     border-radius: 6px;
   }
+  .canvas-el.circle {
+    border: 2px solid var(--coral-deep);
+    background: var(--rose);
+    border-radius: 50%;
+  }
+  .canvas-el.line { background: transparent; }
+  .canvas-el.line svg { width: 100%; height: 100%; display: block; }
   .canvas-el.text, .canvas-el.note {
     border-radius: 8px;
   }
@@ -1522,7 +1465,6 @@
       <button data-view="library"><span class="nav-icon">♡</span> Library</button>
       <button data-view="analysis"><span class="nav-icon">◐</span> Analysis</button>
       <button data-view="assistant"><span class="nav-icon">✧</span> Assistant</button>
-      <button data-view="export"><span class="nav-icon">⇩</span> Export</button>
       <button data-view="design"><span class="nav-icon">▦</span> Design</button>
     </nav>
   </aside>
@@ -2117,6 +2059,8 @@ function renderCanvasElement(el) {
     inner = `<textarea data-el-text="${el.id}" placeholder="${el.type === 'note' ? 'note...' : 'text...'}">${escape(el.text || '')}</textarea>`;
   } else if (el.type === 'image') {
     inner = `<img data-el-img="${el.id}" alt="">`;
+  } else if (el.type === 'line') {
+    inner = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100" stroke="var(--coral-deep)" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>`;
   }
   const label = el.type === 'frame' ? escape(el.text || 'Frame') : '';
   return `
@@ -2139,6 +2083,8 @@ function renderCanvas(file) {
       <div class="canvas-toolbar">
         <button class="canvas-tool-btn" data-tool="frame">▦ frame</button>
         <button class="canvas-tool-btn" data-tool="rect">▭ rect</button>
+        <button class="canvas-tool-btn" data-tool="circle">◯ circle</button>
+        <button class="canvas-tool-btn" data-tool="line">╱ line</button>
         <button class="canvas-tool-btn" data-tool="text">T text</button>
         <button class="canvas-tool-btn" data-tool="note">✎ note</button>
         <button class="canvas-tool-btn" data-tool="image">▤ image</button>
@@ -2233,16 +2179,17 @@ function attachCanvasEvents() {
         return;
       }
       const elDiv = target.closest('.canvas-el');
-      if (elDiv && !state.activeTool) {
+      if (elDiv) {
         const el = file.elements.find(x => x.id === elDiv.dataset.el);
         if (!el) return;
+        if (state.activeTool) { state.activeTool = null; render(); }
         state.selectedElementId = el.id;
         canvasDragState = { mode: 'move', id: el.id, startX: e.clientX, startY: e.clientY, origX: el.x, origY: el.y };
         document.querySelectorAll('.canvas-el').forEach(d => d.classList.toggle('selected', d.dataset.el === el.id));
         e.preventDefault();
         return;
       }
-      if (!elDiv && (state.activeTool === 'frame' || state.activeTool === 'rect')) {
+      if (!elDiv && (state.activeTool === 'frame' || state.activeTool === 'rect' || state.activeTool === 'circle' || state.activeTool === 'line')) {
         const start = getCoords(e);
         canvasDragState = { mode: 'draw', tool: state.activeTool, startX: start.x, startY: start.y };
         const preview = document.createElement('div');
@@ -2416,7 +2363,6 @@ function render() {
     library: 'saved research ♡',
     analysis: 'the pretty charts ✿',
     assistant: 'your research bestie ✧',
-    export: 'show your work ✿',
   };
 
   const totalCards = p.boards.reduce((sum, b) => sum + b.cards.length, 0);
@@ -2440,7 +2386,6 @@ function render() {
   else if (state.currentView === 'library') body = renderLibrary();
   else if (state.currentView === 'analysis') body = renderAnalysis(p);
   else if (state.currentView === 'assistant') body = renderAssistant();
-  else if (state.currentView === 'export') body = renderExport(p);
 
   main.innerHTML = header + body;
   attachViewEvents();
@@ -2482,6 +2427,7 @@ function renderBoard(p) {
     <div class="board-tabs">
       ${tabs}
       <button class="board-tab add-board-tab" id="addBoardBtn">+ new board</button>
+      <button class="board-tab add-board-tab" id="exportFullDataBtn" style="margin-left:auto;">⇩ full data export</button>
     </div>
     <div class="kanban">${cols}</div>
   `;
@@ -2544,6 +2490,8 @@ function attachBoardEvents() {
       render();
     };
   }
+  const exportFullDataBtn = document.getElementById('exportFullDataBtn');
+  if (exportFullDataBtn) exportFullDataBtn.onclick = () => exportFullJSON(p);
 }
 
 function openCardModal(columnId, cardId = null) {
@@ -2676,6 +2624,10 @@ function renderCoding(p) {
         ${p.codebook.length ? `<div class="codebook-hint">
           ${doc && doc.kind === 'media' ? 'pick a code, mark in/out on the player, then code the segment' : 'pick a code, then highlight text in the doc to tag it'} ✿ click a coded bit to add a memo or remove it
         </div>` : ''}
+        <div style="display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1.5px dashed var(--line); flex-wrap:wrap;">
+          <button class="btn btn-secondary" id="exportCodebookBtn" style="font-size:12px; padding:6px 12px;">⇩ codebook</button>
+          <button class="btn btn-secondary" id="exportAuditBtn" style="font-size:12px; padding:6px 12px;">⇩ audit trail</button>
+        </div>
       </div>
     </div>
   `;
@@ -2765,8 +2717,13 @@ function attachMediaCodingEvents(doc) {
 }
 
 function attachCodingEvents() {
+  const p = currentProject();
   const sel = document.getElementById('docSelect');
   if (sel) sel.onchange = () => { state.currentDocId = sel.value; saveState(); render(); };
+  const exportCodebookBtn = document.getElementById('exportCodebookBtn');
+  if (exportCodebookBtn) exportCodebookBtn.onclick = () => downloadText(`${slugify(p.name)}_codebook_appendix.txt`, generateCodebookAppendix(p));
+  const exportAuditBtn = document.getElementById('exportAuditBtn');
+  if (exportAuditBtn) exportAuditBtn.onclick = () => downloadText(`${slugify(p.name)}_audit_trail.txt`, generateAuditTrailText(p));
   document.querySelectorAll('[data-code]').forEach(el => {
     el.onclick = (e) => {
       if (e.target.dataset.deleteCode || e.target.dataset.editCode) return;
@@ -2824,7 +2781,6 @@ function attachCodingEvents() {
       }
     };
   }
-  const p = currentProject();
   const activeDoc = p && p.docs.find(d => d.id === state.currentDocId);
   if (activeDoc && activeDoc.kind === 'media') attachMediaCodingEvents(activeDoc);
 }
@@ -3050,6 +3006,7 @@ function renderLibrary() {
         <input type="text" id="linkNotes" placeholder="key quote, tag, or why you saved it...">
       </div>
     </div>
+    ${state.library.length ? `<button class="btn btn-secondary" id="exportLibraryBtn" style="margin-bottom:18px;">⇩ export library</button>` : ''}
     ${state.library.length ? `<div class="library-grid">${links}</div>` : `
       <div class="empty-state">
         <div class="doodle">♡</div>
@@ -3068,6 +3025,8 @@ function attachLibraryEvents() {
       render();
     };
   });
+  const exportLibraryBtn = document.getElementById('exportLibraryBtn');
+  if (exportLibraryBtn) exportLibraryBtn.onclick = () => downloadText('fieldnote_library.txt', generateLibraryExport(state.library));
 }
 
 function addLink() {
@@ -3167,6 +3126,7 @@ function renderAnalysis(p) {
         ${docChart}
         ${cardChart}
       </div>
+      <button class="btn btn-secondary" id="exportMethodsBtn" style="margin-top:18px;">⇩ methods section draft</button>
     </div>
     <div class="analysis-section">
       <div class="eyebrow">the quantitative pretties</div>
@@ -3178,6 +3138,9 @@ function renderAnalysis(p) {
 }
 
 function attachAnalysisEvents() {
+  const p = currentProject();
+  const exportMethodsBtn = document.getElementById('exportMethodsBtn');
+  if (exportMethodsBtn) exportMethodsBtn.onclick = () => downloadText(`${slugify(p.name)}_methods_draft.txt`, generateMethodsDraft(p));
   const drop = document.getElementById('csvDrop');
   const fileInput = document.getElementById('csvFile');
   if (drop && fileInput) {
@@ -3501,57 +3464,21 @@ function exportFullJSON(p) {
   downloadText(`${slugify(p.name)}_fieldnote_export.json`, JSON.stringify(data, null, 2), 'application/json');
 }
 
-function renderExport(p) {
-  const log = (p.auditLog || []).slice().reverse();
-  const auditHtml = log.length ? log.map(e => `
-    <div class="audit-item">${escape(e.detail)}<span class="audit-time">${new Date(e.ts).toLocaleString()}</span></div>
-  `).join('') : '<div style="font-size:13px;color:var(--ink-mute);font-style:italic;">nothing logged yet — start coding to build your audit trail</div>';
-
-  return `
-    <div class="export-grid">
-      <div class="export-card">
-        <h3>full data export</h3>
-        <p>everything in this project — boards, docs, codebook, codings, memos — as JSON. media files themselves live in your browser's storage and aren't included in this file.</p>
-        <button class="btn" id="exportJsonBtn" style="margin-top:auto;">⇩ download JSON</button>
-      </div>
-      <div class="export-card">
-        <h3>codebook appendix</h3>
-        <p>your codebook formatted for a paper appendix — themes, subthemes, definitions, and excerpt counts.</p>
-        <div class="export-preview">${escape(generateCodebookAppendix(p))}</div>
-        <button class="btn" id="exportCodebookBtn" style="margin-top:auto;">⇩ download .txt</button>
-      </div>
-      <div class="export-card">
-        <h3>methods section draft</h3>
-        <p>a starting paragraph describing your coding process, generated from your actual project data.</p>
-        <div class="export-preview">${escape(generateMethodsDraft(p))}</div>
-        <button class="btn" id="exportMethodsBtn" style="margin-top:auto;">⇩ download .txt</button>
-      </div>
-      <div class="export-card">
-        <h3>audit trail</h3>
-        <p>a timestamped log of every code and coding decision — your "show your work" record.</p>
-        <div class="audit-list">${auditHtml}</div>
-        <button class="btn" id="exportAuditBtn" style="margin-top:14px;">⇩ download .txt</button>
-      </div>
-    </div>
-  `;
+function generateAuditTrailText(p) {
+  const log = p.auditLog || [];
+  const lines = log.map(e => `${new Date(e.ts).toISOString()}\t${e.type}\t${e.detail}`);
+  return `AUDIT TRAIL — ${p.name}\n\n` + (lines.join('\n') || '(no events logged yet)');
 }
 
-function attachExportEvents() {
-  const p = currentProject();
-  const jsonBtn = document.getElementById('exportJsonBtn');
-  if (jsonBtn) jsonBtn.onclick = () => exportFullJSON(p);
-  const codebookBtn = document.getElementById('exportCodebookBtn');
-  if (codebookBtn) codebookBtn.onclick = () => downloadText(`${slugify(p.name)}_codebook_appendix.txt`, generateCodebookAppendix(p));
-  const methodsBtn = document.getElementById('exportMethodsBtn');
-  if (methodsBtn) methodsBtn.onclick = () => downloadText(`${slugify(p.name)}_methods_draft.txt`, generateMethodsDraft(p));
-  const auditBtn = document.getElementById('exportAuditBtn');
-  if (auditBtn) {
-    auditBtn.onclick = () => {
-      const log = p.auditLog || [];
-      const lines = log.map(e => `${new Date(e.ts).toISOString()}\t${e.type}\t${e.detail}`);
-      downloadText(`${slugify(p.name)}_audit_trail.txt`, `AUDIT TRAIL — ${p.name}\n\n` + (lines.join('\n') || '(no events logged yet)'));
-    };
-  }
+function generateLibraryExport(library) {
+  let out = `SAVED LIBRARY\nGenerated ${new Date().toLocaleString()}\n\n`;
+  if (!library.length) return out + '(nothing saved yet)\n';
+  library.forEach(l => {
+    out += `${l.title}\n${l.url}\n`;
+    if (l.notes) out += `  ${l.notes}\n`;
+    out += '\n';
+  });
+  return out;
 }
 
 function attachViewEvents() {
@@ -3561,7 +3488,6 @@ function attachViewEvents() {
   else if (state.currentView === 'library') attachLibraryEvents();
   else if (state.currentView === 'analysis') attachAnalysisEvents();
   else if (state.currentView === 'assistant') attachAssistantEvents();
-  else if (state.currentView === 'export') attachExportEvents();
   else if (state.currentView === 'design') attachDesignFilesEvents();
   else if (state.currentView === 'canvas') attachCanvasEvents();
 }
