@@ -1291,6 +1291,31 @@
     border-color: var(--coral-deep);
     color: white;
   }
+  .canvas-tool-group { position: relative; display: inline-block; }
+  .shape-picker {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 6px;
+    display: flex;
+    gap: 4px;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+  }
+  .shape-picker-btn {
+    width: 32px;
+    height: 32px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    font-size: 15px;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .shape-picker-btn:hover { background: var(--blush); border-color: var(--rose); }
   .canvas-scroll {
     flex: 1;
     overflow: auto;
@@ -1333,8 +1358,30 @@
     background: var(--rose);
     border-radius: 50%;
   }
-  .canvas-el.line { background: transparent; }
-  .canvas-el.line svg { width: 100%; height: 100%; display: block; }
+  .canvas-el.line, .canvas-el.arrow { background: transparent; }
+  .canvas-el.line svg, .canvas-el.arrow svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .canvas-el.button {
+    background: var(--coral);
+    border-radius: 10px;
+    border: none;
+    box-shadow: var(--shadow-sm);
+  }
+  .canvas-el.button textarea {
+    color: white;
+    font-weight: 700;
+    text-align: center;
+    padding-top: 10px;
+  }
+  .canvas-el.input {
+    background: white;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+  }
+  .canvas-el.input textarea {
+    color: var(--ink-mute);
+    font-size: 12px;
+    padding-top: 10px;
+  }
   .canvas-el.text, .canvas-el.note {
     border-radius: 8px;
   }
@@ -2054,13 +2101,16 @@ function saveDesignFileModal() {
 function renderCanvasElement(el) {
   const style = `left:${el.x}px; top:${el.y}px; width:${el.w}px; height:${el.h}px;${el.color ? ` background:${el.color};` : ''}`;
   const selected = state.selectedElementId === el.id ? ' selected' : '';
+  const placeholders = { note: 'note...', text: 'text...', button: 'Button', input: 'label...' };
   let inner = '';
-  if (el.type === 'text' || el.type === 'note') {
-    inner = `<textarea data-el-text="${el.id}" placeholder="${el.type === 'note' ? 'note...' : 'text...'}">${escape(el.text || '')}</textarea>`;
+  if (['text', 'note', 'button', 'input'].includes(el.type)) {
+    inner = `<textarea data-el-text="${el.id}" placeholder="${placeholders[el.type]}">${escape(el.text || '')}</textarea>`;
   } else if (el.type === 'image') {
     inner = `<img data-el-img="${el.id}" alt="">`;
   } else if (el.type === 'line') {
     inner = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100" stroke="var(--coral-deep)" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>`;
+  } else if (el.type === 'arrow') {
+    inner = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><defs><marker id="arrowhead-${el.id}" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><polygon points="0 0, 6 3, 0 6" fill="var(--coral-deep)" /></marker></defs><line x1="2" y1="2" x2="96" y2="96" stroke="var(--coral-deep)" stroke-width="3" vector-effect="non-scaling-stroke" marker-end="url(#arrowhead-${el.id})"/></svg>`;
   }
   const label = el.type === 'frame' ? escape(el.text || 'Frame') : '';
   return `
@@ -2082,9 +2132,17 @@ function renderCanvas(file) {
       </div>
       <div class="canvas-toolbar">
         <button class="canvas-tool-btn" data-tool="frame">▦ frame</button>
-        <button class="canvas-tool-btn" data-tool="rect">▭ rect</button>
-        <button class="canvas-tool-btn" data-tool="circle">◯ circle</button>
-        <button class="canvas-tool-btn" data-tool="line">╱ line</button>
+        <div class="canvas-tool-group">
+          <button class="canvas-tool-btn" id="shapeToolBtn">▭ shape ▾</button>
+          <div class="shape-picker" id="shapePicker" style="display:none;">
+            <button class="shape-picker-btn" data-tool="rect" title="rectangle">▭</button>
+            <button class="shape-picker-btn" data-tool="circle" title="circle">◯</button>
+            <button class="shape-picker-btn" data-tool="line" title="line">╱</button>
+            <button class="shape-picker-btn" data-tool="arrow" title="arrow">↗</button>
+          </div>
+        </div>
+        <button class="canvas-tool-btn" data-tool="button">▬ button</button>
+        <button class="canvas-tool-btn" data-tool="input">▯ input</button>
         <button class="canvas-tool-btn" data-tool="text">T text</button>
         <button class="canvas-tool-btn" data-tool="note">✎ note</button>
         <button class="canvas-tool-btn" data-tool="image">▤ image</button>
@@ -2111,7 +2169,7 @@ function attachCanvasEvents() {
     render();
   };
 
-  document.querySelectorAll('.canvas-tool-btn').forEach(btn => {
+  document.querySelectorAll('.canvas-tool-btn[data-tool]').forEach(btn => {
     btn.classList.toggle('active', state.activeTool === btn.dataset.tool);
     btn.onclick = () => {
       const tool = btn.dataset.tool;
@@ -2120,6 +2178,24 @@ function attachCanvasEvents() {
       render();
     };
   });
+
+  const shapeToolBtn = document.getElementById('shapeToolBtn');
+  const shapePicker = document.getElementById('shapePicker');
+  if (shapeToolBtn && shapePicker) {
+    shapeToolBtn.classList.toggle('active', ['rect', 'circle', 'line', 'arrow'].includes(state.activeTool));
+    shapeToolBtn.onclick = (e) => {
+      e.stopPropagation();
+      shapePicker.style.display = shapePicker.style.display === 'none' ? 'flex' : 'none';
+    };
+    document.querySelectorAll('.shape-picker-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        state.activeTool = btn.dataset.tool;
+        shapePicker.style.display = 'none';
+        render();
+      };
+    });
+  }
 
   const imageInput = document.getElementById('canvasImageInput');
   if (imageInput) {
@@ -2169,6 +2245,8 @@ function attachCanvasEvents() {
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
     surface.onmousedown = (e) => {
+      const picker = document.getElementById('shapePicker');
+      if (picker && picker.style.display !== 'none') picker.style.display = 'none';
       const target = e.target;
       if (target.dataset.elDelete) return;
       if (target.dataset.elResize) {
@@ -2189,7 +2267,7 @@ function attachCanvasEvents() {
         e.preventDefault();
         return;
       }
-      if (!elDiv && (state.activeTool === 'frame' || state.activeTool === 'rect' || state.activeTool === 'circle' || state.activeTool === 'line')) {
+      if (!elDiv && ['frame', 'rect', 'circle', 'line', 'arrow'].includes(state.activeTool)) {
         const start = getCoords(e);
         canvasDragState = { mode: 'draw', tool: state.activeTool, startX: start.x, startY: start.y };
         const preview = document.createElement('div');
@@ -2203,11 +2281,12 @@ function attachCanvasEvents() {
         e.preventDefault();
         return;
       }
-      if (!elDiv && (state.activeTool === 'text' || state.activeTool === 'note')) {
+      if (!elDiv && ['text', 'note', 'button', 'input'].includes(state.activeTool)) {
         const start = getCoords(e);
         const id = uid('el');
-        const h = state.activeTool === 'note' ? 120 : 40;
-        file.elements.push({ id, type: state.activeTool, x: start.x, y: start.y, w: 160, h, text: '' });
+        const dims = { text: [160, 40, ''], note: [160, 120, ''], button: [140, 44, 'Button'], input: [200, 40, ''] };
+        const [w, h, defaultText] = dims[state.activeTool];
+        file.elements.push({ id, type: state.activeTool, x: start.x, y: start.y, w, h, text: defaultText });
         state.selectedElementId = id;
         state.activeTool = null;
         saveState();
