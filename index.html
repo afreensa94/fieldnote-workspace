@@ -1297,6 +1297,166 @@
   }
   .sidebar-signout:hover { color: var(--coral-deep); }
 
+  .canvas-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  .canvas-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    border-bottom: 2px dashed var(--line);
+    background: var(--cream);
+    flex-shrink: 0;
+  }
+  .canvas-header h2 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--ink);
+  }
+  .canvas-back-btn {
+    background: var(--card);
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .canvas-back-btn:hover { border-color: var(--rose); color: var(--ink); }
+  .canvas-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--blush);
+    border-bottom: 2px dashed var(--line);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .canvas-tool-btn {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .canvas-tool-btn:hover { border-color: var(--rose); }
+  .canvas-tool-btn.active {
+    background: var(--coral);
+    border-color: var(--coral-deep);
+    color: white;
+  }
+  .canvas-scroll {
+    flex: 1;
+    overflow: auto;
+    background: var(--cream);
+    background-image: radial-gradient(circle, var(--line-soft) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .canvas-surface {
+    position: relative;
+    width: 2400px;
+    height: 1600px;
+  }
+  .canvas-el {
+    position: absolute;
+    box-sizing: border-box;
+    cursor: grab;
+  }
+  .canvas-el:active { cursor: grabbing; }
+  .canvas-el.frame {
+    border: 2px solid var(--ink-mute);
+    background: rgba(255,255,255,0.4);
+  }
+  .canvas-el.frame::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -22px;
+    left: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    font-family: 'Nunito', sans-serif;
+  }
+  .canvas-el.rect {
+    border: 2px solid var(--coral-deep);
+    background: var(--rose);
+    border-radius: 6px;
+  }
+  .canvas-el.text, .canvas-el.note {
+    border-radius: 8px;
+  }
+  .canvas-el.note {
+    background: var(--butter);
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid rgba(0,0,0,0.05);
+  }
+  .canvas-el.image {
+    border: 2px solid var(--line-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--card);
+  }
+  .canvas-el.image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .canvas-el textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    resize: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    padding: 8px;
+    cursor: text;
+  }
+  .canvas-el textarea:focus { outline: none; }
+  .canvas-el.selected {
+    outline: 2px solid var(--coral);
+    outline-offset: 2px;
+  }
+  .canvas-resize-handle {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: var(--coral);
+    border: 2px solid white;
+    cursor: nwse-resize;
+    display: none;
+  }
+  .canvas-el.selected .canvas-resize-handle { display: block; }
+  .canvas-el-delete {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--coral-deep);
+    color: white;
+    border: 2px solid white;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .canvas-el.selected .canvas-el-delete { display: flex; }
+
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 8px; border: 2px solid var(--cream); }
@@ -1363,6 +1523,7 @@
       <button data-view="analysis"><span class="nav-icon">◐</span> Analysis</button>
       <button data-view="assistant"><span class="nav-icon">✧</span> Assistant</button>
       <button data-view="export"><span class="nav-icon">⇩</span> Export</button>
+      <button data-view="design"><span class="nav-icon">▦</span> Design</button>
     </nav>
   </aside>
 
@@ -1489,12 +1650,37 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="designFileModal">
+  <div class="modal">
+    <h3>New design file ✎</h3>
+    <div class="field">
+      <label>file name</label>
+      <input type="text" id="designFileName" placeholder="e.g. Onboarding flow — v2">
+    </div>
+    <div class="field">
+      <label>tags (optional, comma separated)</label>
+      <input type="text" id="designFileTags" placeholder="e.g. Prototype, Wireframe">
+    </div>
+    <div class="field">
+      <label>link to a research project (optional)</label>
+      <select id="designFileLinkedProject"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeDesignFileModal()">nevermind</button>
+      <button class="btn" onclick="saveDesignFileModal()">✿ create</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://bcuqhbwagkyxrbkiuesj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hhj_IeCLFmHCB7GT-u4lNA_tx7D_r9v';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let supabaseUser = null;
 let authMode = 'signin';
+let canvasDragState = null;
+let canvasListenersBound = false;
+let canvasKeyListenerBound = false;
 
 const HIGHLIGHT_PALETTE = [
   { name: 'blush', hex: '#ffe3ed' },
@@ -1513,6 +1699,10 @@ let state = {
   currentDocId: null,
   activeCodeId: null,
   projects: {},
+  designFiles: {},
+  currentDesignFileId: null,
+  activeTool: null,
+  selectedElementId: null,
   library: [],
   aiHistory: [],
   csvData: null,
@@ -1546,12 +1736,15 @@ async function loadState() {
     const { data: rows, error } = await supabaseClient.from('projects').select('*').eq('user_id', supabaseUser.id);
     if (error) throw error;
     state.projects = {};
+    state.designFiles = {};
     (rows || []).forEach(row => {
       if (row.id === '__meta__') {
         const meta = row.data || {};
         state.library = meta.library || [];
         state.aiHistory = meta.aiHistory || [];
         state.profile = meta.profile || { name: 'Ana', avatar: null };
+      } else if (row.data && row.data.kind === 'design') {
+        state.designFiles[row.id] = { id: row.id, name: row.name, ...row.data };
       } else {
         state.projects[row.id] = { id: row.id, name: row.name, ...row.data };
       }
@@ -1594,6 +1787,20 @@ async function saveState() {
       },
       updated_at: new Date().toISOString(),
     }));
+    Object.values(state.designFiles).forEach(f => {
+      rows.push({
+        id: f.id,
+        user_id: supabaseUser.id,
+        name: f.name,
+        data: {
+          kind: 'design',
+          tags: f.tags || [],
+          linkedProjectId: f.linkedProjectId || null,
+          elements: f.elements || [],
+        },
+        updated_at: new Date().toISOString(),
+      });
+    });
     rows.push({
       id: '__meta__',
       user_id: supabaseUser.id,
@@ -1839,6 +2046,315 @@ function attachProjectsEvents() {
   if (addTile) addTile.onclick = () => openProjectModal();
 }
 
+function currentDesignFile() { return state.designFiles[state.currentDesignFileId]; }
+
+function renderDesignFiles() {
+  const tiles = Object.values(state.designFiles).map(f => {
+    const linked = f.linkedProjectId ? state.projects[f.linkedProjectId] : null;
+    const tagsHtml = (f.tags || []).map(t => `<span class="card-tag" style="margin-right:4px;">${escape(t)}</span>`).join('');
+    return `
+      <div class="project-tile" data-design-file="${f.id}">
+        <span class="project-tile-dot" style="background:var(--coral)"></span>
+        <h4>${escape(f.name)}</h4>
+        <div class="project-tile-meta">${(f.elements || []).length} element${(f.elements || []).length === 1 ? '' : 's'}${linked ? ' · ' + escape(linked.name) : ''}</div>
+        ${tagsHtml ? `<div style="margin-top:8px;">${tagsHtml}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="project-grid">
+      ${tiles}
+      <div class="project-tile project-tile-add" id="newDesignFileTile">
+        <span class="project-tile-add-icon">✎</span>
+        <span>new file</span>
+      </div>
+    </div>
+  `;
+}
+
+function attachDesignFilesEvents() {
+  document.querySelectorAll('[data-design-file]').forEach(tile => {
+    tile.onclick = () => {
+      state.currentDesignFileId = tile.dataset.designFile;
+      state.currentView = 'canvas';
+      saveState();
+      render();
+    };
+  });
+  const addTile = document.getElementById('newDesignFileTile');
+  if (addTile) addTile.onclick = () => openDesignFileModal();
+}
+
+function openDesignFileModal() {
+  document.getElementById('designFileName').value = '';
+  document.getElementById('designFileTags').value = '';
+  const select = document.getElementById('designFileLinkedProject');
+  const options = Object.values(state.projects).map(p => `<option value="${p.id}">${escape(p.name)}</option>`).join('');
+  select.innerHTML = `<option value="">— none —</option>${options}`;
+  document.getElementById('designFileModal').classList.add('open');
+  setTimeout(() => document.getElementById('designFileName').focus(), 50);
+}
+function closeDesignFileModal() { document.getElementById('designFileModal').classList.remove('open'); }
+function saveDesignFileModal() {
+  const name = document.getElementById('designFileName').value.trim();
+  if (!name) return;
+  const tags = document.getElementById('designFileTags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const linkedProjectId = document.getElementById('designFileLinkedProject').value || null;
+  const id = uid('design');
+  state.designFiles[id] = { id, name, tags, linkedProjectId, elements: [] };
+  state.currentDesignFileId = id;
+  state.currentView = 'canvas';
+  saveState();
+  closeDesignFileModal();
+  render();
+}
+
+function renderCanvasElement(el) {
+  const style = `left:${el.x}px; top:${el.y}px; width:${el.w}px; height:${el.h}px;${el.color ? ` background:${el.color};` : ''}`;
+  const selected = state.selectedElementId === el.id ? ' selected' : '';
+  let inner = '';
+  if (el.type === 'text' || el.type === 'note') {
+    inner = `<textarea data-el-text="${el.id}" placeholder="${el.type === 'note' ? 'note...' : 'text...'}">${escape(el.text || '')}</textarea>`;
+  } else if (el.type === 'image') {
+    inner = `<img data-el-img="${el.id}" alt="">`;
+  }
+  const label = el.type === 'frame' ? escape(el.text || 'Frame') : '';
+  return `
+    <div class="canvas-el ${el.type}${selected}" data-el="${el.id}" data-label="${label}" style="${style}">
+      ${inner}
+      <div class="canvas-el-delete" data-el-delete="${el.id}">×</div>
+      <div class="canvas-resize-handle" data-el-resize="${el.id}"></div>
+    </div>
+  `;
+}
+
+function renderCanvas(file) {
+  const els = (file.elements || []).map(el => renderCanvasElement(el)).join('');
+  return `
+    <div class="canvas-page">
+      <div class="canvas-header">
+        <button class="canvas-back-btn" id="canvasBackBtn">← files</button>
+        <h2>${escape(file.name)}</h2>
+      </div>
+      <div class="canvas-toolbar">
+        <button class="canvas-tool-btn" data-tool="frame">▦ frame</button>
+        <button class="canvas-tool-btn" data-tool="rect">▭ rect</button>
+        <button class="canvas-tool-btn" data-tool="text">T text</button>
+        <button class="canvas-tool-btn" data-tool="note">✎ note</button>
+        <button class="canvas-tool-btn" data-tool="image">▤ image</button>
+        <input type="file" id="canvasImageInput" accept="image/*" style="display:none;">
+      </div>
+      <div class="canvas-scroll">
+        <div class="canvas-surface" id="canvasSurface">${els}</div>
+      </div>
+    </div>
+  `;
+}
+
+function attachCanvasEvents() {
+  const file = currentDesignFile();
+  if (!file) return;
+  file.elements = file.elements || [];
+
+  const backBtn = document.getElementById('canvasBackBtn');
+  if (backBtn) backBtn.onclick = () => {
+    state.currentView = 'design';
+    state.selectedElementId = null;
+    state.activeTool = null;
+    saveState();
+    render();
+  };
+
+  document.querySelectorAll('.canvas-tool-btn').forEach(btn => {
+    btn.classList.toggle('active', state.activeTool === btn.dataset.tool);
+    btn.onclick = () => {
+      const tool = btn.dataset.tool;
+      if (tool === 'image') { document.getElementById('canvasImageInput').click(); return; }
+      state.activeTool = state.activeTool === tool ? null : tool;
+      render();
+    };
+  });
+
+  const imageInput = document.getElementById('canvasImageInput');
+  if (imageInput) {
+    imageInput.onchange = async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const mediaKey = uid('media');
+      await mediaPut(mediaKey, f);
+      const id = uid('el');
+      file.elements.push({ id, type: 'image', x: 120, y: 120, w: 240, h: 160, mediaKey });
+      state.selectedElementId = id;
+      saveState();
+      render();
+    };
+  }
+
+  document.querySelectorAll('[data-el-img]').forEach(img => {
+    const el = file.elements.find(e => e.id === img.dataset.elImg);
+    if (el && el.mediaKey) getMediaUrl(el.mediaKey).then(url => { if (url) img.src = url; });
+  });
+
+  document.querySelectorAll('[data-el-text]').forEach(ta => {
+    ta.oninput = () => {
+      const el = file.elements.find(e => e.id === ta.dataset.elText);
+      if (el) el.text = ta.value;
+    };
+    ta.onblur = () => saveState();
+    ta.onmousedown = (e) => e.stopPropagation();
+  });
+
+  document.querySelectorAll('[data-el-delete]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const cur = currentDesignFile();
+      cur.elements = cur.elements.filter(x => x.id !== btn.dataset.elDelete);
+      if (state.selectedElementId === btn.dataset.elDelete) state.selectedElementId = null;
+      saveState();
+      render();
+    };
+  });
+
+  const surface = document.getElementById('canvasSurface');
+  if (surface) {
+    surface.style.cursor = state.activeTool ? 'crosshair' : 'default';
+    const getCoords = (e) => {
+      const rect = surface.getBoundingClientRect();
+      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
+    surface.onmousedown = (e) => {
+      const target = e.target;
+      if (target.dataset.elDelete) return;
+      if (target.dataset.elResize) {
+        const el = file.elements.find(x => x.id === target.dataset.elResize);
+        if (!el) return;
+        canvasDragState = { mode: 'resize', id: el.id, startX: e.clientX, startY: e.clientY, origW: el.w, origH: el.h };
+        e.preventDefault();
+        return;
+      }
+      const elDiv = target.closest('.canvas-el');
+      if (elDiv && !state.activeTool) {
+        const el = file.elements.find(x => x.id === elDiv.dataset.el);
+        if (!el) return;
+        state.selectedElementId = el.id;
+        canvasDragState = { mode: 'move', id: el.id, startX: e.clientX, startY: e.clientY, origX: el.x, origY: el.y };
+        document.querySelectorAll('.canvas-el').forEach(d => d.classList.toggle('selected', d.dataset.el === el.id));
+        e.preventDefault();
+        return;
+      }
+      if (!elDiv && (state.activeTool === 'frame' || state.activeTool === 'rect')) {
+        const start = getCoords(e);
+        canvasDragState = { mode: 'draw', tool: state.activeTool, startX: start.x, startY: start.y };
+        const preview = document.createElement('div');
+        preview.id = 'canvasDrawPreview';
+        preview.className = `canvas-el ${state.activeTool}`;
+        preview.style.left = start.x + 'px';
+        preview.style.top = start.y + 'px';
+        preview.style.width = '0px';
+        preview.style.height = '0px';
+        surface.appendChild(preview);
+        e.preventDefault();
+        return;
+      }
+      if (!elDiv && (state.activeTool === 'text' || state.activeTool === 'note')) {
+        const start = getCoords(e);
+        const id = uid('el');
+        const h = state.activeTool === 'note' ? 120 : 40;
+        file.elements.push({ id, type: state.activeTool, x: start.x, y: start.y, w: 160, h, text: '' });
+        state.selectedElementId = id;
+        state.activeTool = null;
+        saveState();
+        render();
+        setTimeout(() => { const ta = document.querySelector(`[data-el-text="${id}"]`); if (ta) ta.focus(); }, 30);
+        return;
+      }
+      if (!elDiv) {
+        state.selectedElementId = null;
+        document.querySelectorAll('.canvas-el.selected').forEach(d => d.classList.remove('selected'));
+      }
+    };
+  }
+
+  if (!canvasListenersBound) {
+    canvasListenersBound = true;
+    window.addEventListener('mousemove', (e) => {
+      if (!canvasDragState) return;
+      if (canvasDragState.mode === 'move') {
+        const div = document.querySelector(`[data-el="${canvasDragState.id}"]`);
+        if (div) {
+          div.style.left = (canvasDragState.origX + e.clientX - canvasDragState.startX) + 'px';
+          div.style.top = (canvasDragState.origY + e.clientY - canvasDragState.startY) + 'px';
+        }
+      } else if (canvasDragState.mode === 'resize') {
+        const div = document.querySelector(`[data-el="${canvasDragState.id}"]`);
+        if (div) {
+          div.style.width = Math.max(24, canvasDragState.origW + e.clientX - canvasDragState.startX) + 'px';
+          div.style.height = Math.max(24, canvasDragState.origH + e.clientY - canvasDragState.startY) + 'px';
+        }
+      } else if (canvasDragState.mode === 'draw') {
+        const surf = document.getElementById('canvasSurface');
+        const preview = document.getElementById('canvasDrawPreview');
+        if (surf && preview) {
+          const rect = surf.getBoundingClientRect();
+          const curX = e.clientX - rect.left, curY = e.clientY - rect.top;
+          const x = Math.min(curX, canvasDragState.startX), y = Math.min(curY, canvasDragState.startY);
+          preview.style.left = x + 'px';
+          preview.style.top = y + 'px';
+          preview.style.width = Math.abs(curX - canvasDragState.startX) + 'px';
+          preview.style.height = Math.abs(curY - canvasDragState.startY) + 'px';
+        }
+      }
+    });
+    window.addEventListener('mouseup', (e) => {
+      if (!canvasDragState) return;
+      const f = currentDesignFile();
+      if (f) {
+        if (canvasDragState.mode === 'move') {
+          const el = f.elements.find(x => x.id === canvasDragState.id);
+          if (el) { el.x = canvasDragState.origX + e.clientX - canvasDragState.startX; el.y = canvasDragState.origY + e.clientY - canvasDragState.startY; }
+          saveState();
+        } else if (canvasDragState.mode === 'resize') {
+          const el = f.elements.find(x => x.id === canvasDragState.id);
+          if (el) { el.w = Math.max(24, canvasDragState.origW + e.clientX - canvasDragState.startX); el.h = Math.max(24, canvasDragState.origH + e.clientY - canvasDragState.startY); }
+          saveState();
+        } else if (canvasDragState.mode === 'draw') {
+          const preview = document.getElementById('canvasDrawPreview');
+          if (preview) {
+            const w = parseFloat(preview.style.width) || 0;
+            const h = parseFloat(preview.style.height) || 0;
+            if (w > 10 && h > 10) {
+              const id = uid('el');
+              f.elements.push({ id, type: canvasDragState.tool, x: parseFloat(preview.style.left), y: parseFloat(preview.style.top), w: Math.max(30, w), h: Math.max(30, h) });
+              state.selectedElementId = id;
+            }
+            preview.remove();
+          }
+          state.activeTool = null;
+          saveState();
+        }
+      }
+      canvasDragState = null;
+      if (state.currentView === 'canvas') render();
+    });
+  }
+
+  if (!canvasKeyListenerBound) {
+    canvasKeyListenerBound = true;
+    document.addEventListener('keydown', (e) => {
+      if (state.currentView !== 'canvas' || !state.selectedElementId) return;
+      if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const f = currentDesignFile();
+        if (!f) return;
+        f.elements = f.elements.filter(x => x.id !== state.selectedElementId);
+        state.selectedElementId = null;
+        saveState();
+        render();
+      }
+    });
+  }
+}
+
 function renderSidebar() {
   const profileSlot = document.getElementById('profileSlot');
   if (profileSlot) profileSlot.innerHTML = renderProfile();
@@ -1864,6 +2380,29 @@ function render() {
       </div>
       ${renderProjects()}
     `;
+    attachViewEvents();
+    return;
+  }
+
+  if (state.currentView === 'design') {
+    main.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">sketch it out ✎</div>
+          <h1>Your Design Files<span class="heart">♡</span></h1>
+        </div>
+        <div class="meta"><strong>${Object.keys(state.designFiles).length}</strong> total</div>
+      </div>
+      ${renderDesignFiles()}
+    `;
+    attachViewEvents();
+    return;
+  }
+
+  if (state.currentView === 'canvas') {
+    const file = currentDesignFile();
+    if (!file) { state.currentView = 'design'; render(); return; }
+    main.innerHTML = renderCanvas(file);
     attachViewEvents();
     return;
   }
@@ -3023,6 +3562,8 @@ function attachViewEvents() {
   else if (state.currentView === 'analysis') attachAnalysisEvents();
   else if (state.currentView === 'assistant') attachAssistantEvents();
   else if (state.currentView === 'export') attachExportEvents();
+  else if (state.currentView === 'design') attachDesignFilesEvents();
+  else if (state.currentView === 'canvas') attachCanvasEvents();
 }
 
 function showAuthScreen(show) {
