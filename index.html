@@ -1,0 +1,3105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fieldnote ✿ Research Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Nunito:wght@400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --ink: #4a2c3e;
+    --ink-soft: #7a5468;
+    --ink-mute: #a58497;
+    --cream: #fffbf3;
+    --blush: #ffeaf1;
+    --peach: #fff3d6;
+    --rose: #ffd8e5;
+    --coral: #f49cc0;
+    --coral-deep: #db6fa0;
+    --lilac: #cae1e9;
+    --sage: #e3f1f5;
+    --butter: #ffe9b7;
+    --mint: #b9d9e3;
+    --lavender: #f5b8ce;
+    --sky: #9fc7d6;
+    --card: #fffdfb;
+    --line: #ffdcea;
+    --line-soft: #fff0f5;
+    --shadow-sm: 0 1px 0 rgba(219,111,160,0.05), 0 2px 8px rgba(219,111,160,0.06);
+    --shadow-md: 0 2px 0 rgba(219,111,160,0.06), 0 6px 20px rgba(219,111,160,0.08);
+    --shadow-lg: 0 4px 0 rgba(219,111,160,0.08), 0 12px 32px rgba(219,111,160,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255, 216, 229, 0.35) 0%, transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(202, 225, 233, 0.35) 0%, transparent 40%),
+      var(--cream);
+    color: var(--ink);
+    font-family: 'Nunito', -apple-system, system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button, input, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    height: 100vh;
+  }
+
+  aside {
+    background: linear-gradient(180deg, var(--blush) 0%, var(--peach) 100%);
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    overflow-y: auto;
+    border-right: 2px dashed var(--line);
+  }
+
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-style: italic;
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .brand .flower {
+    font-family: 'Nunito', sans-serif;
+    font-style: normal;
+    color: var(--coral);
+    font-size: 22px;
+    font-weight: 400;
+    transform: rotate(-10deg);
+    display: inline-block;
+  }
+  .brand-tag {
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    color: var(--coral-deep);
+    margin-top: -2px;
+    padding-left: 4px;
+    font-weight: 600;
+  }
+
+  nav { display: flex; flex-direction: column; gap: 4px; }
+  nav button {
+    background: transparent;
+    border: 2px solid transparent;
+    text-align: left;
+    padding: 10px 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+  }
+  nav button:hover {
+    background: rgba(255,255,255,0.5);
+    color: var(--ink);
+  }
+  nav button.active {
+    background: var(--cream);
+    color: var(--ink);
+    border-color: var(--rose);
+    box-shadow: var(--shadow-sm);
+  }
+  .nav-icon {
+    font-size: 15px;
+    display: inline-block;
+    width: 18px;
+    text-align: center;
+  }
+
+  .profile-card {
+    background: linear-gradient(135deg, var(--blush) 0%, var(--peach) 100%);
+    border: 2px dashed var(--rose);
+    border-radius: 20px;
+    padding: 18px 14px 14px;
+    text-align: center;
+    position: relative;
+  }
+  .profile-avatar-wrap {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 10px;
+  }
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--cream);
+    border: 3px solid var(--card);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--coral);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .profile-avatar:hover { transform: scale(1.05); box-shadow: var(--shadow-md); }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-deco {
+    position: absolute;
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .profile-deco.d1 { top: -6px; right: -6px; color: var(--coral); transform: rotate(12deg); }
+  .profile-deco.d2 { bottom: -2px; left: -10px; color: var(--rose); font-size: 14px; transform: rotate(-8deg); }
+  .profile-deco.d3 { top: 2px; left: -12px; color: var(--lavender); font-size: 13px; }
+  .profile-name-input {
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-family: 'Caveat', cursive;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--coral-deep);
+    width: 100%;
+  }
+  .profile-name-input:focus { outline: none; }
+  .profile-upload-hint {
+    font-family: 'Caveat', cursive;
+    font-size: 12.5px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .project-tile {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 18px;
+    padding: 20px 18px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .project-tile:hover {
+    transform: translateY(-2px) rotate(-0.2deg);
+    border-color: var(--rose);
+    box-shadow: var(--shadow-md);
+  }
+  .project-tile-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    display: inline-block;
+    margin-bottom: 10px;
+    box-shadow: 0 0 0 3px var(--cream);
+  }
+  .project-tile h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .project-tile-meta {
+    font-size: 12px;
+    color: var(--ink-mute);
+    font-weight: 600;
+  }
+  .project-tile-add {
+    border: 2px dashed var(--coral);
+    background: rgba(255,255,255,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--coral-deep);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .project-tile-add:hover { background: var(--blush); }
+  .project-tile-add-icon { font-size: 26px; }
+
+  .board-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 4px;
+    padding-bottom: 4px;
+  }
+  .board-tab {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .board-tab:hover { border-color: var(--rose); color: var(--ink); }
+  .board-tab.active {
+    background: var(--blush);
+    border-color: var(--coral);
+    color: var(--ink);
+  }
+  .board-tab-delete {
+    opacity: 0;
+    color: var(--coral-deep);
+    font-weight: 700;
+    transition: opacity 0.15s;
+  }
+  .board-tab:hover .board-tab-delete { opacity: 1; }
+  .add-board-tab {
+    border: 2px dashed var(--line);
+    color: var(--ink-mute);
+    background: transparent;
+  }
+  .add-board-tab:hover { border-color: var(--coral); color: var(--coral-deep); background: var(--blush); }
+
+  main {
+    overflow-y: auto;
+    padding: 36px 44px 60px;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 24px;
+    margin-bottom: 28px;
+    border-bottom: 2px dashed var(--line);
+  }
+  .page-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 40px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    font-style: italic;
+  }
+  .page-header h1 .heart {
+    color: var(--coral);
+    font-style: normal;
+    display: inline-block;
+    transform: translateY(-4px);
+    margin-left: 4px;
+  }
+  .page-header .eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: var(--coral-deep);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .page-header .meta {
+    font-size: 13px;
+    color: var(--ink-mute);
+    text-align: right;
+    font-weight: 500;
+    line-height: 1.7;
+  }
+  .page-header .meta strong { color: var(--coral-deep); font-weight: 700; }
+
+  .kanban {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    padding: 12px 0 20px;
+  }
+  .kanban-col {
+    flex: 0 0 290px;
+    background: var(--card);
+    border-radius: 20px;
+    padding: 16px;
+    max-height: calc(100vh - 260px);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+    border: 2px solid var(--line-soft);
+    position: relative;
+  }
+  .kanban-col::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 20px;
+    right: 20px;
+    height: 6px;
+    background: var(--rose);
+    border-radius: 4px;
+    opacity: 0.7;
+  }
+  .kanban-col:nth-child(2)::before { background: var(--butter); }
+  .kanban-col:nth-child(3)::before { background: var(--mint); }
+  .kanban-col:nth-child(4)::before { background: var(--lavender); }
+  .kanban-col:nth-child(5)::before { background: var(--sky); }
+
+  .col-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px 12px;
+    border-bottom: 1.5px dashed var(--line);
+    margin-bottom: 12px;
+  }
+  .col-header h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .col-count {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    color: var(--coral-deep);
+    background: var(--blush);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  .col-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 3px;
+    min-height: 50px;
+  }
+  .card {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 14px;
+    padding: 13px 14px;
+    cursor: grab;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-2px) rotate(-0.3deg);
+    box-shadow: var(--shadow-md);
+    border-color: var(--rose);
+  }
+  .card:active { cursor: grabbing; }
+  .card.dragging { opacity: 0.4; transform: rotate(2deg); }
+  .card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+  .card p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .card-meta {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .card-tag {
+    padding: 3px 10px;
+    border-radius: 10px;
+    background: var(--butter);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .add-card-btn {
+    background: transparent;
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    padding: 8px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    margin-top: 4px;
+    transition: all 0.15s;
+    font-family: 'Caveat', cursive;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .add-card-btn:hover {
+    border-color: var(--coral);
+    color: var(--coral-deep);
+    background: var(--blush);
+  }
+  .col-drop-target { background: var(--blush); }
+
+  .btn {
+    padding: 9px 18px;
+    background: var(--coral);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:hover {
+    background: var(--coral-deep);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--ink);
+    border: 2px solid var(--line);
+  }
+  .btn-secondary:hover {
+    background: var(--blush);
+    border-color: var(--rose);
+  }
+
+  .coding-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
+  .doc-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .doc-selector select {
+    padding: 8px 14px;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .doc-canvas {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 20px;
+    padding: 36px 40px;
+    min-height: 420px;
+    line-height: 1.75;
+    font-size: 16px;
+    box-shadow: var(--shadow-sm);
+    white-space: pre-wrap;
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    background-image: linear-gradient(var(--line-soft) 1px, transparent 1px);
+    background-size: 100% 32px;
+    background-position: 0 44px;
+  }
+  .doc-canvas:empty::before {
+    content: '✿ upload some raw text to start coding';
+    color: var(--ink-mute);
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    font-style: normal;
+  }
+
+  .code-highlight {
+    padding: 2px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: outline 0.1s;
+  }
+  .code-highlight:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+  .codebook {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 20px;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    box-shadow: var(--shadow-sm);
+  }
+  .codebook h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 14px;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .codebook h3::after {
+    content: '✿';
+    color: var(--coral);
+    font-style: normal;
+    font-size: 15px;
+    transform: rotate(15deg);
+    display: inline-block;
+  }
+  .code-list { display: flex; flex-direction: column; gap: 4px; }
+  .code-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: 2px solid transparent;
+  }
+  .code-item:hover { background: var(--blush); }
+  .code-item.active {
+    background: var(--blush);
+    border-color: var(--coral);
+    font-weight: 700;
+  }
+  .code-swatch {
+    width: 16px; height: 16px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(0,0,0,0.05);
+  }
+  .code-name { flex: 1; color: var(--ink); }
+  .code-count {
+    font-size: 11px;
+    color: var(--ink-mute);
+    background: var(--line-soft);
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .code-delete {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--coral-deep);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    font-weight: 700;
+  }
+  .code-item:hover .code-delete { opacity: 1; }
+
+  .add-code-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1.5px dashed var(--line);
+  }
+  .add-code-form input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    background: var(--cream);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .add-code-form input:focus { outline: none; border-color: var(--coral); background: white; }
+  .add-code-form button {
+    padding: 8px 14px;
+    background: var(--coral);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 16px;
+  }
+
+  .codebook-hint {
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--ink-mute);
+    margin-top: 14px;
+    line-height: 1.4;
+    padding-top: 12px;
+    border-top: 1.5px dashed var(--line);
+    font-weight: 500;
+  }
+
+  .library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .link-card {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    transition: all 0.15s;
+  }
+  .link-card:hover {
+    transform: translateY(-2px) rotate(-0.2deg);
+    border-color: var(--rose);
+    box-shadow: var(--shadow-md);
+  }
+  .link-card:nth-child(3n)::before {
+    content: '✿'; position: absolute; top: -10px; right: 16px;
+    color: var(--coral); font-size: 20px; transform: rotate(15deg);
+  }
+  .link-card:nth-child(3n+1)::before {
+    content: '♡'; position: absolute; top: -10px; right: 16px;
+    color: var(--rose); font-size: 22px;
+  }
+  .link-card:nth-child(3n+2)::before {
+    content: '✧'; position: absolute; top: -10px; right: 16px;
+    color: var(--lavender); font-size: 22px;
+  }
+  .link-card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .link-card a {
+    color: var(--coral-deep);
+    text-decoration: none;
+    font-size: 12px;
+    word-break: break-all;
+    font-weight: 600;
+  }
+  .link-card a:hover { text-decoration: underline; }
+  .link-card p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+  .link-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1.5px dashed var(--line-soft);
+    font-size: 11px;
+    color: var(--ink-mute);
+    font-weight: 600;
+  }
+  .link-delete {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: none;
+    border: none;
+    color: var(--ink-mute);
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0;
+    transition: all 0.15s;
+    font-weight: 700;
+  }
+  .link-card:hover .link-delete { opacity: 1; color: var(--coral-deep); }
+
+  .add-link-panel {
+    background: linear-gradient(135deg, var(--blush) 0%, var(--peach) 100%);
+    padding: 24px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+    border: 2px solid var(--line);
+  }
+  .field label {
+    display: block;
+    font-family: 'Caveat', cursive;
+    font-size: 17px;
+    color: var(--coral-deep);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .field input, .field textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+  }
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--coral);
+    background: white;
+  }
+
+  .analysis-section {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 22px;
+    padding: 28px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .analysis-section h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    font-style: italic;
+    color: var(--ink);
+  }
+  .analysis-section .eyebrow {
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    color: var(--coral-deep);
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .analysis-section .section-desc {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+    max-width: 600px;
+    line-height: 1.55;
+  }
+
+  .csv-drop {
+    border: 3px dashed var(--line);
+    border-radius: 18px;
+    padding: 44px;
+    text-align: center;
+    color: var(--ink-mute);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--cream);
+  }
+  .csv-drop:hover, .csv-drop.dragover {
+    border-color: var(--coral);
+    color: var(--coral-deep);
+    background: var(--blush);
+  }
+  .csv-drop-icon {
+    font-family: 'Caveat', cursive;
+    font-size: 42px;
+    color: var(--coral);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .chart-card {
+    background: var(--blush);
+    border-radius: 16px;
+    padding: 20px;
+    border: 2px solid var(--line-soft);
+  }
+  .chart-card:nth-child(4n+1) { background: var(--lilac); }
+  .chart-card:nth-child(4n+2) { background: var(--mint); }
+  .chart-card:nth-child(4n+3) { background: var(--butter); }
+  .chart-card:nth-child(4n) { background: var(--blush); }
+
+  .chart-title {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .chart-title small {
+    font-family: 'Caveat', cursive;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    display: block;
+    margin-top: 2px;
+    font-style: normal;
+  }
+  .bar-chart { display: flex; flex-direction: column; gap: 7px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .bar-label {
+    flex: 0 0 100px;
+    color: var(--ink);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--coral);
+    border-radius: 8px;
+    transition: width 0.5s ease-out;
+  }
+  .bar-value {
+    flex: 0 0 42px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .code-freq-chart .bar-fill { background: var(--fill-color, var(--coral)); }
+
+  .ai-panel {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 220px);
+    min-height: 500px;
+  }
+  .ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 2px dashed var(--line);
+    margin-bottom: 16px;
+  }
+  .ai-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    font-style: italic;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .ai-header h2::after {
+    content: '✿';
+    color: var(--coral);
+    font-style: normal;
+    font-size: 18px;
+    transform: rotate(10deg);
+    display: inline-block;
+  }
+  .ai-context {
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--coral-deep);
+    font-weight: 600;
+  }
+
+  .ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-right: 6px;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 14px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .msg.user {
+    background: var(--coral);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    font-weight: 500;
+  }
+  .msg.ai {
+    background: var(--blush);
+    color: var(--ink);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    border: 2px solid var(--line-soft);
+  }
+  .msg.thinking {
+    color: var(--ink-mute);
+    font-family: 'Caveat', cursive;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .ai-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+
+  .ai-input-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 2px dashed var(--line);
+  }
+  .ai-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    background: var(--cream);
+    font-size: 14px;
+    resize: none;
+    min-height: 46px;
+    max-height: 130px;
+    font-family: inherit;
+    font-weight: 500;
+  }
+  .ai-input:focus { outline: none; border-color: var(--coral); background: white; }
+
+  .ai-suggestions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .suggestion-chip {
+    padding: 6px 14px;
+    background: var(--butter);
+    border: 2px solid var(--line-soft);
+    border-radius: 16px;
+    font-size: 12px;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 700;
+  }
+  .suggestion-chip:nth-child(2) { background: var(--mint); }
+  .suggestion-chip:nth-child(3) { background: var(--lilac); }
+  .suggestion-chip:nth-child(4) { background: var(--peach); }
+  .suggestion-chip:nth-child(5) { background: var(--rose); }
+  .suggestion-chip:hover {
+    transform: translateY(-1px);
+    border-color: var(--coral);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(74,44,62,0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--cream);
+    border-radius: 22px;
+    padding: 32px;
+    width: 480px;
+    max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    border: 2px solid var(--rose);
+  }
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--ink);
+  }
+  .modal .field { margin-bottom: 16px; }
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--ink-mute);
+  }
+  .empty-state h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-style: italic;
+    font-weight: 500;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .empty-state p {
+    font-size: 14px;
+    max-width: 360px;
+    margin: 0 auto 20px;
+    line-height: 1.55;
+  }
+  .empty-state .doodle {
+    font-family: 'Caveat', cursive;
+    font-size: 48px;
+    color: var(--coral);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .code-memo-btn {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--ink-mute);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 2px;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .code-item:hover .code-memo-btn { opacity: 1; }
+  .code-memo-btn.has-memo { opacity: 1; color: var(--coral-deep); }
+
+  .doc-kind-toggle { display: flex; gap: 8px; }
+  .doc-kind-btn {
+    flex: 1;
+    padding: 9px 12px;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--ink-soft);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .doc-kind-btn.active { background: var(--blush); border-color: var(--coral); color: var(--ink); }
+
+  .media-player-wrap {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .media-mark-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .media-mark-display {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--blush);
+    padding: 6px 12px;
+    border-radius: 10px;
+  }
+  .segment-list {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .segment-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+  }
+  .segment-item:hover { background: var(--blush); }
+  .segment-swatch { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+  .segment-code { flex: 1; font-weight: 700; color: var(--ink); }
+  .segment-time { color: var(--ink-mute); font-weight: 600; font-size: 12px; }
+
+  .excerpt-preview {
+    background: var(--blush);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+  .excerpt-remove-btn { color: var(--coral-deep); }
+
+  .export-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 18px;
+  }
+  .export-card {
+    background: var(--card);
+    border: 2px solid var(--line-soft);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+  }
+  .export-card h3 {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .export-card p {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .export-preview {
+    background: var(--cream);
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow-y: auto;
+    margin-bottom: 14px;
+    color: var(--ink-soft);
+  }
+  .audit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .audit-item {
+    font-size: 12.5px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: var(--cream);
+    border-left: 3px solid var(--coral);
+    color: var(--ink);
+  }
+  .audit-item .audit-time {
+    color: var(--ink-mute);
+    font-size: 11px;
+    font-weight: 600;
+    display: block;
+    margin-top: 2px;
+  }
+
+  .auth-screen {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255, 216, 229, 0.35) 0%, transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(202, 225, 233, 0.35) 0%, transparent 40%),
+      var(--cream);
+    z-index: 200;
+  }
+  .auth-card {
+    background: var(--card);
+    border: 2px solid var(--rose);
+    border-radius: 24px;
+    padding: 36px 34px;
+    width: 380px;
+    max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .auth-card .brand { justify-content: center; margin-bottom: 2px; }
+  .auth-card .brand-tag { margin-bottom: 22px; }
+  .auth-card .field { text-align: left; margin-bottom: 14px; }
+  .auth-error {
+    font-size: 13px;
+    color: var(--coral-deep);
+    font-weight: 600;
+    margin-bottom: 12px;
+    min-height: 16px;
+  }
+  .auth-switch {
+    margin-top: 14px;
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: var(--ink-mute);
+    cursor: pointer;
+  }
+  .auth-switch:hover { color: var(--coral-deep); }
+  .sidebar-signout {
+    background: none;
+    border: none;
+    font-family: 'Caveat', cursive;
+    font-size: 13px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    text-decoration: underline;
+    margin-top: 6px;
+  }
+  .sidebar-signout:hover { color: var(--coral-deep); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--rose); border-radius: 8px; border: 2px solid var(--cream); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--coral); }
+
+  @media (max-width: 900px) {
+    #app { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+    aside {
+      padding: 20px;
+      gap: 18px;
+      border-right: none;
+      border-bottom: 2px dashed var(--line);
+    }
+    main { padding: 24px 20px 60px; }
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .page-header .meta { text-align: left; }
+    .page-header h1 { font-size: 30px; }
+    .coding-layout { grid-template-columns: 1fr; }
+    .add-link-panel { grid-template-columns: 1fr; }
+    .codebook { position: static; }
+    nav { flex-direction: row; overflow-x: auto; gap: 6px; }
+    nav button { flex-shrink: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="brand">Fieldnote <span class="flower">✿</span></div>
+    <div class="brand-tag">a soft place for research</div>
+    <div class="field">
+      <label>email</label>
+      <input type="email" id="authEmail" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>password</label>
+      <input type="password" id="authPassword" placeholder="••••••••">
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <button class="btn" id="authSignInBtn" style="width:100%;">✿ sign in</button>
+    <div class="auth-switch" id="authSwitchToSignUp">new here? create an account</div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
+  <aside>
+    <div>
+      <div class="brand">Fieldnote <span class="flower">✿</span></div>
+      <div class="brand-tag">a soft place for research</div>
+    </div>
+
+    <div id="profileSlot"></div>
+
+    <nav id="mainNav">
+      <button data-view="projects"><span class="nav-icon">❀</span> Projects</button>
+      <button data-view="board" class="active"><span class="nav-icon">✿</span> Board</button>
+      <button data-view="coding"><span class="nav-icon">✎</span> Coding</button>
+      <button data-view="library"><span class="nav-icon">♡</span> Library</button>
+      <button data-view="analysis"><span class="nav-icon">◐</span> Analysis</button>
+      <button data-view="assistant"><span class="nav-icon">✧</span> Assistant</button>
+      <button data-view="export"><span class="nav-icon">⇩</span> Export</button>
+    </nav>
+  </aside>
+
+  <main id="mainContent"></main>
+</div>
+
+<div class="modal-backdrop" id="projectModal">
+  <div class="modal">
+    <h3>New project ✿</h3>
+    <div class="field">
+      <label>what are we calling it?</label>
+      <input type="text" id="newProjectName" placeholder="e.g. CPTSD Serious Games Study">
+    </div>
+    <div class="field">
+      <label>pick a color</label>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="color-pick" data-color="#f49cc0" style="width:28px; height:28px; border-radius:50%; border:3px solid var(--ink); background:#f49cc0; cursor:pointer;"></button>
+        <button class="color-pick" data-color="#db6fa0" style="width:28px; height:28px; border-radius:50%; border:none; background:#db6fa0; cursor:pointer;"></button>
+        <button class="color-pick" data-color="#ffd8e5" style="width:28px; height:28px; border-radius:50%; border:none; background:#ffd8e5; cursor:pointer;"></button>
+        <button class="color-pick" data-color="#9fc7d6" style="width:28px; height:28px; border-radius:50%; border:none; background:#9fc7d6; cursor:pointer;"></button>
+        <button class="color-pick" data-color="#cae1e9" style="width:28px; height:28px; border-radius:50%; border:none; background:#cae1e9; cursor:pointer;"></button>
+        <button class="color-pick" data-color="#f0c868" style="width:28px; height:28px; border-radius:50%; border:none; background:#f0c868; cursor:pointer;"></button>
+        <button class="color-pick" data-color="#ffe9b7" style="width:28px; height:28px; border-radius:50%; border:none; background:#ffe9b7; cursor:pointer;"></button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeProjectModal()">nevermind</button>
+      <button class="btn" onclick="createProject()">✿ create</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="cardModal">
+  <div class="modal">
+    <h3 id="cardModalTitle">New card ✿</h3>
+    <div class="field">
+      <label>title</label>
+      <input type="text" id="cardTitle" placeholder="what are you working on?">
+    </div>
+    <div class="field">
+      <label>notes (optional)</label>
+      <textarea id="cardNotes" rows="4" placeholder="context, deadlines, thoughts..."></textarea>
+    </div>
+    <div class="field">
+      <label>tag (optional)</label>
+      <input type="text" id="cardTag" placeholder="e.g. interview, lit-review, pilot">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeCardModal()">nevermind</button>
+      <button class="btn" onclick="saveCard()">✿ save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="docModal">
+  <div class="modal">
+    <h3>Add document ✿</h3>
+    <div class="field">
+      <label>document name</label>
+      <input type="text" id="docName" placeholder="e.g. Interview 03 — Participant A">
+    </div>
+    <div class="field">
+      <label>type</label>
+      <div class="doc-kind-toggle">
+        <button type="button" class="doc-kind-btn" id="docKindTextBtn" data-kind="text">✎ text</button>
+        <button type="button" class="doc-kind-btn" id="docKindMediaBtn" data-kind="media">▶ audio / video</button>
+      </div>
+    </div>
+    <div class="field" id="docTextFields">
+      <label>paste text or upload a file</label>
+      <textarea id="docText" rows="8" placeholder="paste transcript, field notes, or open-ended responses..."></textarea>
+      <input type="file" id="docFile" accept=".txt,.md" style="margin-top: 10px;">
+    </div>
+    <div class="field" id="docMediaFields" style="display:none;">
+      <label>upload audio or video</label>
+      <input type="file" id="docMediaFile" accept="audio/*,video/*">
+      <div class="codebook-hint" style="margin-top:8px;">stored locally in your browser (IndexedDB) — stays on this device</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeDocModal()">nevermind</button>
+      <button class="btn" onclick="saveDoc()">✿ add</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="codeModal">
+  <div class="modal">
+    <h3>Code details ✎</h3>
+    <div class="field">
+      <label>name</label>
+      <input type="text" id="codeModalName" placeholder="code name">
+    </div>
+    <div class="field">
+      <label>parent theme</label>
+      <select id="codeModalParent"></select>
+    </div>
+    <div class="field">
+      <label>memo (definition, inclusion criteria, notes...)</label>
+      <textarea id="codeModalMemo" rows="5" placeholder="what does this code mean? when do you apply it?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeCodeModal()">nevermind</button>
+      <button class="btn" onclick="saveCodeModal()">✿ save</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="excerptModal">
+  <div class="modal">
+    <h3><span id="excerptCodeLabel">excerpt</span> ✎</h3>
+    <div class="field">
+      <label>excerpt</label>
+      <div id="excerptPreview" class="excerpt-preview"></div>
+    </div>
+    <div class="field">
+      <label>memo</label>
+      <textarea id="excerptMemo" rows="4" placeholder="why did you code this? what stands out?"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeExcerptModal()">close</button>
+      <button class="btn btn-secondary excerpt-remove-btn" onclick="removeExcerptCoding()">remove coding</button>
+      <button class="btn" onclick="saveExcerptModal()">✿ save memo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://bcuqhbwagkyxrbkiuesj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hhj_IeCLFmHCB7GT-u4lNA_tx7D_r9v';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabaseUser = null;
+let authMode = 'signin';
+
+const HIGHLIGHT_PALETTE = [
+  { name: 'blush', hex: '#ffe3ed' },
+  { name: 'butter', hex: '#ffe9b7' },
+  { name: 'mint', hex: '#d7ecf2' },
+  { name: 'lilac', hex: '#cae1e9' },
+  { name: 'peach', hex: '#fff0d2' },
+  { name: 'sky', hex: '#aecfdc' },
+  { name: 'rose', hex: '#ffd8e5' },
+  { name: 'sage', hex: '#f5b8ce' },
+];
+
+let state = {
+  currentProjectId: null,
+  currentView: 'board',
+  currentDocId: null,
+  activeCodeId: null,
+  projects: {},
+  library: [],
+  aiHistory: [],
+  csvData: null,
+  csvName: null,
+  editingCardId: null,
+  editingColumnId: null,
+  newProjectColor: '#f49cc0',
+  profile: { name: 'Ana', avatar: null },
+};
+
+const DEFAULT_COLUMNS = [
+  { id: 'ideas', name: 'ideas ✿' },
+  { id: 'todo', name: 'to do' },
+  { id: 'doing', name: 'in progress' },
+  { id: 'review', name: 'review' },
+  { id: 'done', name: 'done ♡' },
+];
+
+async function loadState() {
+  try {
+    const localRaw = localStorage.getItem('fieldnote-nav-cache');
+    if (localRaw) {
+      const cached = JSON.parse(localRaw);
+      state.currentProjectId = cached.currentProjectId ?? state.currentProjectId;
+      state.currentView = cached.currentView ?? state.currentView;
+      state.currentDocId = cached.currentDocId ?? state.currentDocId;
+    }
+  } catch (e) { /* ignore */ }
+
+  try {
+    const { data: rows, error } = await supabaseClient.from('projects').select('*').eq('user_id', supabaseUser.id);
+    if (error) throw error;
+    state.projects = {};
+    (rows || []).forEach(row => {
+      if (row.id === '__meta__') {
+        const meta = row.data || {};
+        state.library = meta.library || [];
+        state.aiHistory = meta.aiHistory || [];
+        state.profile = meta.profile || { name: 'Ana', avatar: null };
+      } else {
+        state.projects[row.id] = { id: row.id, name: row.name, ...row.data };
+      }
+    });
+  } catch (e) {
+    console.error('Load from Supabase failed:', e);
+  }
+
+  if (!state.currentProjectId || !state.projects[state.currentProjectId]) {
+    const firstId = Object.keys(state.projects)[0];
+    if (firstId) state.currentProjectId = firstId;
+    else seedDemoData();
+  }
+  await saveState();
+}
+
+async function saveState() {
+  try {
+    localStorage.setItem('fieldnote-nav-cache', JSON.stringify({
+      currentProjectId: state.currentProjectId,
+      currentView: state.currentView,
+      currentDocId: state.currentDocId,
+    }));
+  } catch (e) { /* ignore */ }
+
+  if (!supabaseUser) return;
+  try {
+    const rows = Object.values(state.projects).map(p => ({
+      id: p.id,
+      user_id: supabaseUser.id,
+      name: p.name,
+      data: {
+        color: p.color,
+        boards: p.boards,
+        currentBoardId: p.currentBoardId,
+        docs: p.docs,
+        codebook: p.codebook,
+        codings: p.codings,
+        auditLog: p.auditLog || [],
+      },
+      updated_at: new Date().toISOString(),
+    }));
+    rows.push({
+      id: '__meta__',
+      user_id: supabaseUser.id,
+      name: '__meta__',
+      data: { library: state.library, aiHistory: state.aiHistory, profile: state.profile },
+      updated_at: new Date().toISOString(),
+    });
+    const { error } = await supabaseClient.from('projects').upsert(rows);
+    if (error) throw error;
+  } catch (e) {
+    console.error('Save to Supabase failed:', e);
+  }
+}
+
+function seedDemoData() {
+  const id = 'proj_' + Date.now();
+  const boardId = 'board_' + Date.now();
+  state.projects[id] = {
+    id,
+    name: 'CPTSD Serious Games',
+    color: '#f49cc0',
+    boards: [{
+      id: boardId,
+      name: 'Main Board',
+      columns: DEFAULT_COLUMNS.map(c => ({ ...c })),
+      cards: [
+        { id: 'c1', columnId: 'ideas', title: 'Trilogy structure — early sketch', notes: 'Three games as progressive intervention: awareness → coping → integration.', tag: 'concept' },
+        { id: 'c2', columnId: 'todo', title: 'Lit review: van der Kolk + Herman', notes: 'Pull core CPTSD frameworks for design grounding.', tag: 'lit-review' },
+        { id: 'c3', columnId: 'doing', title: 'Pilot interview protocol', notes: 'Draft semi-structured questions for design research.', tag: 'method' },
+      ],
+    }],
+    currentBoardId: boardId,
+    docs: [],
+    codebook: [],
+    codings: [],
+    auditLog: [],
+  };
+  state.currentProjectId = id;
+}
+
+function uid(prefix = 'id') { return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
+function currentProject() { return state.projects[state.currentProjectId]; }
+function currentBoard(p) {
+  if (!p || !p.boards || !p.boards.length) return null;
+  let board = p.boards.find(b => b.id === p.currentBoardId);
+  if (!board) board = p.boards[0];
+  p.currentBoardId = board.id;
+  return board;
+}
+function escape(str) { return String(str || '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+
+function logEvent(p, type, detail) {
+  if (!p.auditLog) p.auditLog = [];
+  p.auditLog.push({ id: uid('log'), ts: Date.now(), type, detail });
+}
+
+function formatTime(sec) {
+  sec = Math.max(0, Math.floor(sec || 0));
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+function slugify(str) { return (String(str || 'project').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')) || 'project'; }
+
+function downloadText(filename, content, mime = 'text/plain') {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+const MEDIA_DB_NAME = 'fieldnote-media';
+const MEDIA_STORE = 'files';
+function openMediaDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(MEDIA_DB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(MEDIA_STORE); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function mediaCachePut(key, blob) {
+  return openMediaDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(MEDIA_STORE, 'readwrite');
+    tx.objectStore(MEDIA_STORE).put(blob, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+function mediaCacheGet(key) {
+  return openMediaDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(MEDIA_STORE, 'readonly');
+    const req = tx.objectStore(MEDIA_STORE).get(key);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  }));
+}
+function mediaCacheDelete(key) {
+  return openMediaDB().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction(MEDIA_STORE, 'readwrite');
+    tx.objectStore(MEDIA_STORE).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  }));
+}
+
+async function mediaPut(key, blob) {
+  await mediaCachePut(key, blob);
+  if (supabaseUser) {
+    try {
+      const { error } = await supabaseClient.storage.from('media').upload(`${supabaseUser.id}/${key}`, blob, { upsert: true });
+      if (error) console.error('Media cloud upload failed:', error);
+    } catch (e) {
+      console.error('Media cloud upload failed:', e);
+    }
+  }
+}
+async function mediaGet(key) {
+  const local = await mediaCacheGet(key);
+  if (local) return local;
+  if (supabaseUser) {
+    try {
+      const { data, error } = await supabaseClient.storage.from('media').download(`${supabaseUser.id}/${key}`);
+      if (!error && data) {
+        await mediaCachePut(key, data);
+        return data;
+      }
+    } catch (e) {
+      console.error('Media cloud download failed:', e);
+    }
+  }
+  return null;
+}
+async function mediaDelete(key) {
+  await mediaCacheDelete(key);
+  if (supabaseUser) {
+    try {
+      await supabaseClient.storage.from('media').remove([`${supabaseUser.id}/${key}`]);
+    } catch (e) {
+      console.error('Media cloud delete failed:', e);
+    }
+  }
+}
+const mediaUrlCache = {};
+async function getMediaUrl(key) {
+  if (mediaUrlCache[key]) return mediaUrlCache[key];
+  const blob = await mediaGet(key);
+  if (!blob) return null;
+  const url = URL.createObjectURL(blob);
+  mediaUrlCache[key] = url;
+  return url;
+}
+
+function renderProfile() {
+  const prof = state.profile || (state.profile = { name: 'Ana', avatar: null });
+  return `
+    <div class="profile-card">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar" id="profileAvatarBtn">
+          ${prof.avatar ? `<img src="${prof.avatar}" alt="profile photo">` : `<span>✿</span>`}
+        </div>
+        <span class="profile-deco d1">✿</span>
+        <span class="profile-deco d2">♡</span>
+        <span class="profile-deco d3">✧</span>
+      </div>
+      <input type="text" id="profileNameInput" class="profile-name-input" value="${escape(prof.name ?? 'Ana')}" maxlength="24">
+      <div class="profile-upload-hint">click your photo to change it ✿</div>
+      <input type="file" id="profileFileInput" accept="image/*" style="display:none">
+      <button class="sidebar-signout" id="signOutBtn">sign out (${escape(supabaseUser ? supabaseUser.email : '')})</button>
+    </div>
+  `;
+}
+
+function attachProfileEvents() {
+  if (!state.profile) state.profile = { name: 'Ana', avatar: null };
+  const avatarBtn = document.getElementById('profileAvatarBtn');
+  const fileInput = document.getElementById('profileFileInput');
+  if (avatarBtn && fileInput) {
+    avatarBtn.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        state.profile.avatar = ev.target.result;
+        saveState();
+        render();
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+  const nameInput = document.getElementById('profileNameInput');
+  if (nameInput) {
+    nameInput.oninput = () => { state.profile.name = nameInput.value; };
+    nameInput.onblur = () => {
+      if (!state.profile.name || !state.profile.name.trim()) state.profile.name = 'Ana';
+      saveState();
+    };
+  }
+  const signOutBtn = document.getElementById('signOutBtn');
+  if (signOutBtn) signOutBtn.onclick = handleSignOut;
+}
+
+function renderProjects() {
+  const tiles = Object.values(state.projects).map(p => {
+    const totalCards = (p.boards || []).reduce((sum, b) => sum + b.cards.length, 0);
+    const boardCount = (p.boards || []).length;
+    return `
+      <div class="project-tile" data-project="${p.id}">
+        <span class="project-tile-dot" style="background:${p.color}"></span>
+        <h4>${escape(p.name)}</h4>
+        <div class="project-tile-meta">${boardCount} board${boardCount === 1 ? '' : 's'} · ${totalCards} cards · ${p.docs.length} docs</div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="project-grid">
+      ${tiles}
+      <div class="project-tile project-tile-add" id="newProjectTile">
+        <span class="project-tile-add-icon">✿</span>
+        <span>new project</span>
+      </div>
+    </div>
+  `;
+}
+
+function attachProjectsEvents() {
+  document.querySelectorAll('[data-project]').forEach(tile => {
+    tile.onclick = () => {
+      state.currentProjectId = tile.dataset.project;
+      state.currentView = 'board';
+      saveState();
+      render();
+    };
+  });
+  const addTile = document.getElementById('newProjectTile');
+  if (addTile) addTile.onclick = () => openProjectModal();
+}
+
+function renderSidebar() {
+  const profileSlot = document.getElementById('profileSlot');
+  if (profileSlot) profileSlot.innerHTML = renderProfile();
+  attachProfileEvents();
+  document.querySelectorAll('#mainNav button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === state.currentView);
+    btn.onclick = () => { state.currentView = btn.dataset.view; saveState(); render(); };
+  });
+}
+
+function render() {
+  renderSidebar();
+  const main = document.getElementById('mainContent');
+
+  if (state.currentView === 'projects') {
+    main.innerHTML = `
+      <div class="page-header">
+        <div>
+          <div class="eyebrow">home base ✿</div>
+          <h1>Your Projects<span class="heart">♡</span></h1>
+        </div>
+        <div class="meta"><strong>${Object.keys(state.projects).length}</strong> total</div>
+      </div>
+      ${renderProjects()}
+    `;
+    attachViewEvents();
+    return;
+  }
+
+  const p = currentProject();
+  if (!p) { main.innerHTML = '<div class="empty-state"><div class="doodle">✿</div><h2>no projects yet</h2><p>head to the Projects tab to create your first one, sweet thing.</p></div>'; return; }
+
+  const eyebrowMap = {
+    board: 'your kanban ✿',
+    coding: 'inductive coding ✿',
+    library: 'saved research ♡',
+    analysis: 'the pretty charts ✿',
+    assistant: 'your research bestie ✧',
+    export: 'show your work ✿',
+  };
+
+  const totalCards = p.boards.reduce((sum, b) => sum + b.cards.length, 0);
+  const header = `
+    <div class="page-header">
+      <div>
+        <div class="eyebrow">${eyebrowMap[state.currentView] || 'project'}</div>
+        <h1>${escape(p.name)}<span class="heart">♡</span></h1>
+      </div>
+      <div class="meta">
+        <strong>${totalCards}</strong> cards<br>
+        <strong>${p.docs.length}</strong> documents<br>
+        <strong>${p.codebook.length}</strong> codes
+      </div>
+    </div>
+  `;
+
+  let body = '';
+  if (state.currentView === 'board') body = renderBoard(p);
+  else if (state.currentView === 'coding') body = renderCoding(p);
+  else if (state.currentView === 'library') body = renderLibrary();
+  else if (state.currentView === 'analysis') body = renderAnalysis(p);
+  else if (state.currentView === 'assistant') body = renderAssistant();
+  else if (state.currentView === 'export') body = renderExport(p);
+
+  main.innerHTML = header + body;
+  attachViewEvents();
+}
+
+function renderBoard(p) {
+  const board = currentBoard(p);
+  if (!board) return '';
+  const tabs = p.boards.map(b => `
+    <button class="board-tab ${b.id === board.id ? 'active' : ''}" data-board="${b.id}">
+      ${escape(b.name)}
+      ${p.boards.length > 1 ? `<span class="board-tab-delete" data-delete-board="${b.id}">×</span>` : ''}
+    </button>
+  `).join('');
+  const cols = board.columns.map(col => {
+    const cards = board.cards.filter(c => c.columnId === col.id);
+    return `
+      <div class="kanban-col" data-column="${col.id}">
+        <div class="col-header">
+          <h3>${escape(col.name)}</h3>
+          <span class="col-count">${cards.length}</span>
+        </div>
+        <div class="col-cards" data-column="${col.id}">
+          ${cards.map(c => `
+            <div class="card" draggable="true" data-card="${c.id}">
+              <h4>${escape(c.title)}</h4>
+              ${c.notes ? `<p>${escape(c.notes)}</p>` : ''}
+              <div class="card-meta">
+                ${c.tag ? `<span class="card-tag">${escape(c.tag)}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+          <button class="add-card-btn" data-add="${col.id}">+ add card</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="board-tabs">
+      ${tabs}
+      <button class="board-tab add-board-tab" id="addBoardBtn">+ new board</button>
+    </div>
+    <div class="kanban">${cols}</div>
+  `;
+}
+
+function attachBoardEvents() {
+  const p = currentProject();
+  document.querySelectorAll('[data-add]').forEach(btn => {
+    btn.onclick = () => openCardModal(btn.dataset.add);
+  });
+  document.querySelectorAll('.card[data-card]').forEach(card => {
+    card.onclick = () => editCard(card.dataset.card);
+    card.addEventListener('dragstart', e => {
+      card.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', card.dataset.card);
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+  });
+  document.querySelectorAll('.col-cards').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('col-drop-target'); });
+    col.addEventListener('dragleave', () => col.classList.remove('col-drop-target'));
+    col.addEventListener('drop', e => {
+      e.preventDefault();
+      col.classList.remove('col-drop-target');
+      const cardId = e.dataTransfer.getData('text/plain');
+      const board = currentBoard(currentProject());
+      const card = board.cards.find(c => c.id === cardId);
+      if (card) { card.columnId = col.dataset.column; saveState(); render(); }
+    });
+  });
+  document.querySelectorAll('[data-board]').forEach(tab => {
+    tab.onclick = (e) => {
+      if (e.target.dataset.deleteBoard) return;
+      p.currentBoardId = tab.dataset.board;
+      saveState();
+      render();
+    };
+  });
+  document.querySelectorAll('[data-delete-board]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      if (p.boards.length <= 1) return;
+      if (!confirm('delete this board and all its cards?')) return;
+      const bid = btn.dataset.deleteBoard;
+      p.boards = p.boards.filter(b => b.id !== bid);
+      if (p.currentBoardId === bid) p.currentBoardId = p.boards[0].id;
+      saveState();
+      render();
+    };
+  });
+  const addBoardBtn = document.getElementById('addBoardBtn');
+  if (addBoardBtn) {
+    addBoardBtn.onclick = () => {
+      const name = prompt('name this board ✿', 'New board');
+      if (!name || !name.trim()) return;
+      const board = { id: uid('board'), name: name.trim(), columns: DEFAULT_COLUMNS.map(c => ({ ...c })), cards: [] };
+      p.boards.push(board);
+      p.currentBoardId = board.id;
+      saveState();
+      render();
+    };
+  }
+}
+
+function openCardModal(columnId, cardId = null) {
+  state.editingColumnId = columnId;
+  state.editingCardId = cardId;
+  if (cardId) {
+    const card = currentBoard(currentProject()).cards.find(c => c.id === cardId);
+    document.getElementById('cardTitle').value = card.title;
+    document.getElementById('cardNotes').value = card.notes || '';
+    document.getElementById('cardTag').value = card.tag || '';
+    document.getElementById('cardModalTitle').textContent = 'Edit card ✿';
+  } else {
+    document.getElementById('cardTitle').value = '';
+    document.getElementById('cardNotes').value = '';
+    document.getElementById('cardTag').value = '';
+    document.getElementById('cardModalTitle').textContent = 'New card ✿';
+  }
+  document.getElementById('cardModal').classList.add('open');
+  setTimeout(() => document.getElementById('cardTitle').focus(), 50);
+}
+function closeCardModal() { document.getElementById('cardModal').classList.remove('open'); }
+function editCard(id) {
+  const card = currentBoard(currentProject()).cards.find(c => c.id === id);
+  openCardModal(card.columnId, id);
+}
+function saveCard() {
+  const title = document.getElementById('cardTitle').value.trim();
+  if (!title) return;
+  const notes = document.getElementById('cardNotes').value.trim();
+  const tag = document.getElementById('cardTag').value.trim();
+  const board = currentBoard(currentProject());
+  if (state.editingCardId) {
+    const card = board.cards.find(c => c.id === state.editingCardId);
+    card.title = title; card.notes = notes; card.tag = tag;
+  } else {
+    board.cards.push({ id: uid('c'), columnId: state.editingColumnId, title, notes, tag });
+  }
+  saveState();
+  closeCardModal();
+  render();
+}
+
+function openProjectModal() {
+  document.getElementById('newProjectName').value = '';
+  state.newProjectColor = '#f49cc0';
+  document.querySelectorAll('.color-pick').forEach(b => {
+    b.style.border = b.dataset.color === state.newProjectColor ? '3px solid var(--ink)' : 'none';
+    b.onclick = () => {
+      state.newProjectColor = b.dataset.color;
+      document.querySelectorAll('.color-pick').forEach(x => x.style.border = x.dataset.color === state.newProjectColor ? '3px solid var(--ink)' : 'none');
+    };
+  });
+  document.getElementById('projectModal').classList.add('open');
+  setTimeout(() => document.getElementById('newProjectName').focus(), 50);
+}
+function closeProjectModal() { document.getElementById('projectModal').classList.remove('open'); }
+function createProject() {
+  const name = document.getElementById('newProjectName').value.trim();
+  if (!name) return;
+  const id = uid('proj');
+  const boardId = uid('board');
+  state.projects[id] = {
+    id, name, color: state.newProjectColor,
+    boards: [{ id: boardId, name: 'Main Board', columns: DEFAULT_COLUMNS.map(c => ({ ...c })), cards: [] }],
+    currentBoardId: boardId,
+    docs: [], codebook: [], codings: [], auditLog: [],
+  };
+  state.currentProjectId = id;
+  state.currentView = 'board';
+  saveState();
+  closeProjectModal();
+  render();
+}
+
+function renderCodeItem(code, p, depth) {
+  const count = p.codings.filter(cd => cd.codeId === code.id).length;
+  const hasMemo = !!(code.memo && code.memo.trim());
+  return `
+    <div class="code-item ${state.activeCodeId === code.id ? 'active' : ''}" data-code="${code.id}" style="margin-left:${depth * 18}px;">
+      <div class="code-swatch" style="background:${code.color}"></div>
+      <span class="code-name">${escape(code.name)}</span>
+      <span class="code-count">${count}</span>
+      <button class="code-memo-btn ${hasMemo ? 'has-memo' : ''}" data-edit-code="${code.id}" title="memo & settings">✎</button>
+      <button class="code-delete" data-delete-code="${code.id}">×</button>
+    </div>
+  `;
+}
+
+function renderCodebookList(p) {
+  const topLevel = p.codebook.filter(c => !c.parentId);
+  return topLevel.map(code => {
+    const children = p.codebook.filter(c => c.parentId === code.id);
+    return renderCodeItem(code, p, 0) + children.map(ch => renderCodeItem(ch, p, 1)).join('');
+  }).join('');
+}
+
+function renderCoding(p) {
+  const doc = state.currentDocId ? p.docs.find(d => d.id === state.currentDocId) : p.docs[0];
+  if (doc) state.currentDocId = doc.id;
+  const docOptions = p.docs.map(d => `<option value="${d.id}" ${d.id === (doc?.id) ? 'selected' : ''}>${d.kind === 'media' ? '▶ ' : '✎ '}${escape(d.name)}</option>`).join('');
+  const codesList = renderCodebookList(p);
+  const topLevelOptions = p.codebook.filter(c => !c.parentId).map(c => `<option value="${c.id}">under: ${escape(c.name)}</option>`).join('');
+  const mainPane = !doc ? `
+      <div class="empty-state">
+        <div class="doodle">✎</div>
+        <h2>no documents yet</h2>
+        <p>add a document — text, or audio/video — to start coding.</p>
+        <button class="btn" onclick="openDocModal()">✿ add first document</button>
+      </div>
+    ` : doc.kind === 'media' ? renderMediaCoding(doc, p) : `<div class="doc-canvas" id="docCanvas" data-doc="${doc.id}">${renderDocContent(doc, p)}</div>`;
+  return `
+    <div class="doc-selector">
+      ${p.docs.length ? `<select id="docSelect">${docOptions}</select>` : ''}
+      <button class="btn btn-secondary" onclick="openDocModal()">✿ add document</button>
+      ${doc ? `<button class="btn btn-secondary" onclick="deleteDoc('${doc.id}')" style="margin-left:auto;">delete this doc</button>` : ''}
+    </div>
+    <div class="coding-layout">
+      <div>${mainPane}</div>
+      <div class="codebook">
+        <h3>codebook</h3>
+        <div class="code-list">${codesList || '<div style="font-size:13px;color:var(--ink-mute);padding:8px 0;font-style:italic;">no codes yet ✿ add one below</div>'}</div>
+        <div class="add-code-form">
+          <input type="text" id="newCodeName" placeholder="new code or subtheme..." maxlength="40">
+          <button onclick="addCode()">+</button>
+        </div>
+        ${topLevelOptions ? `<select id="newCodeParent" style="width:100%; margin-top:8px; padding:6px 10px; border:2px solid var(--line); border-radius:10px; background:var(--cream); font-size:12px; font-weight:600;">
+          <option value="">— top-level theme —</option>
+          ${topLevelOptions}
+        </select>` : ''}
+        ${p.codebook.length ? `<div class="codebook-hint">
+          ${doc && doc.kind === 'media' ? 'pick a code, mark in/out on the player, then code the segment' : 'pick a code, then highlight text in the doc to tag it'} ✿ click a coded bit to add a memo or remove it
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderDocContent(doc, p) {
+  const codings = p.codings.filter(c => c.docId === doc.id).sort((a,b) => a.start - b.start);
+  const text = doc.text;
+  if (!codings.length) return escape(text);
+  let result = '';
+  let cursor = 0;
+  codings.forEach(cd => {
+    const code = p.codebook.find(c => c.id === cd.codeId);
+    if (!code) return;
+    if (cd.start < cursor) return;
+    result += escape(text.slice(cursor, cd.start));
+    result += `<span class="code-highlight" style="background:${code.color}cc;" data-coding="${cd.id}" title="${escape(code.name)}">${escape(text.slice(cd.start, cd.end))}</span>`;
+    cursor = cd.end;
+  });
+  result += escape(text.slice(cursor));
+  return result;
+}
+
+function renderMediaCoding(doc, p) {
+  const segments = p.codings.filter(c => c.docId === doc.id).sort((a, b) => a.start - b.start);
+  const isVideo = (doc.mediaType || '').startsWith('video');
+  const segList = segments.map(cd => {
+    const code = p.codebook.find(c => c.id === cd.codeId);
+    return `
+      <div class="segment-item" data-coding="${cd.id}">
+        <span class="segment-swatch" style="background:${code ? code.color : '#ccc'}"></span>
+        <span class="segment-code">${escape(code ? code.name : '(deleted code)')}</span>
+        <span class="segment-time">${formatTime(cd.start)} – ${formatTime(cd.end)}</span>
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="media-player-wrap">
+      ${isVideo
+        ? `<video id="mediaPlayer" controls style="width:100%; border-radius:14px; background:#000; display:block;"></video>`
+        : `<audio id="mediaPlayer" controls style="width:100%;"></audio>`}
+      <div class="media-mark-row">
+        <button class="btn btn-secondary" id="markInBtn" type="button">mark in</button>
+        <span class="media-mark-display" id="markInDisplay">in: —</span>
+        <button class="btn btn-secondary" id="markOutBtn" type="button">mark out</button>
+        <span class="media-mark-display" id="markOutDisplay">out: —</span>
+        <button class="btn" id="codeSegmentBtn" type="button">✿ code segment</button>
+      </div>
+      ${!state.activeCodeId ? `<div class="codebook-hint">pick a code from the codebook first ✿</div>` : ''}
+    </div>
+    <div class="segment-list">
+      <h3 style="font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:16px;margin-bottom:10px;color:var(--ink);">coded segments</h3>
+      ${segList || '<div style="font-size:13px;color:var(--ink-mute);font-style:italic;">no segments coded yet</div>'}
+    </div>
+  `;
+}
+
+function attachMediaCodingEvents(doc) {
+  const player = document.getElementById('mediaPlayer');
+  if (!player) return;
+  getMediaUrl(doc.mediaKey).then(url => { if (url) player.src = url; });
+  state.mediaMarkIn = null;
+  state.mediaMarkOut = null;
+  const inDisplay = document.getElementById('markInDisplay');
+  const outDisplay = document.getElementById('markOutDisplay');
+  document.getElementById('markInBtn').onclick = () => {
+    state.mediaMarkIn = player.currentTime;
+    inDisplay.textContent = 'in: ' + formatTime(state.mediaMarkIn);
+  };
+  document.getElementById('markOutBtn').onclick = () => {
+    state.mediaMarkOut = player.currentTime;
+    outDisplay.textContent = 'out: ' + formatTime(state.mediaMarkOut);
+  };
+  document.getElementById('codeSegmentBtn').onclick = () => {
+    if (!state.activeCodeId) { alert('pick a code from the codebook first ✿'); return; }
+    if (state.mediaMarkIn == null || state.mediaMarkOut == null) { alert('mark an in and out point first ✿'); return; }
+    const start = Math.min(state.mediaMarkIn, state.mediaMarkOut);
+    const end = Math.max(state.mediaMarkIn, state.mediaMarkOut);
+    if (end <= start) { alert('out point must be after in point'); return; }
+    applyCoding(doc.id, state.activeCodeId, start, end);
+    state.mediaMarkIn = null;
+    state.mediaMarkOut = null;
+  };
+  document.querySelectorAll('[data-coding]').forEach(el => {
+    el.onclick = () => openExcerptModal(el.dataset.coding);
+  });
+}
+
+function attachCodingEvents() {
+  const sel = document.getElementById('docSelect');
+  if (sel) sel.onchange = () => { state.currentDocId = sel.value; saveState(); render(); };
+  document.querySelectorAll('[data-code]').forEach(el => {
+    el.onclick = (e) => {
+      if (e.target.dataset.deleteCode || e.target.dataset.editCode) return;
+      state.activeCodeId = state.activeCodeId === el.dataset.code ? null : el.dataset.code;
+      saveState();
+      render();
+    };
+  });
+  document.querySelectorAll('[data-delete-code]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const cid = btn.dataset.deleteCode;
+      const p = currentProject();
+      const code = p.codebook.find(c => c.id === cid);
+      if (!confirm(`delete "${code ? code.name : 'this code'}"? subthemes will move up to top-level.`)) return;
+      p.codebook.forEach(c => { if (c.parentId === cid) c.parentId = null; });
+      p.codebook = p.codebook.filter(c => c.id !== cid);
+      p.codings = p.codings.filter(c => c.codeId !== cid);
+      if (state.activeCodeId === cid) state.activeCodeId = null;
+      logEvent(p, 'code_deleted', `Deleted code "${code ? code.name : cid}"`);
+      saveState();
+      render();
+    };
+  });
+  document.querySelectorAll('[data-edit-code]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openCodeModal(btn.dataset.editCode);
+    };
+  });
+  const input = document.getElementById('newCodeName');
+  if (input) input.onkeydown = (e) => { if (e.key === 'Enter') addCode(); };
+  const canvas = document.getElementById('docCanvas');
+  if (canvas) {
+    const handleSelect = () => {
+      if (!state.activeCodeId) return;
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) return;
+      const selText = selection.toString();
+      if (!selText.trim()) return;
+      const doc = currentProject().docs.find(d => d.id === state.currentDocId);
+      if (!doc) return;
+      const range = selection.getRangeAt(0);
+      const offsets = computeSelectionOffsets(canvas, range);
+      if (offsets) {
+        applyCoding(doc.id, state.activeCodeId, offsets.start, offsets.end);
+        selection.removeAllRanges();
+      }
+    };
+    canvas.onmouseup = handleSelect;
+    canvas.ontouchend = () => setTimeout(handleSelect, 50);
+    canvas.onclick = (e) => {
+      if (e.target.classList.contains('code-highlight')) {
+        openExcerptModal(e.target.dataset.coding);
+      }
+    };
+  }
+  const p = currentProject();
+  const activeDoc = p && p.docs.find(d => d.id === state.currentDocId);
+  if (activeDoc && activeDoc.kind === 'media') attachMediaCodingEvents(activeDoc);
+}
+
+function computeSelectionOffsets(container, range) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let plainOffset = 0;
+  let startOffset = -1, endOffset = -1;
+  let node;
+  while ((node = walker.nextNode())) {
+    const len = node.nodeValue.length;
+    if (node === range.startContainer) startOffset = plainOffset + range.startOffset;
+    if (node === range.endContainer) { endOffset = plainOffset + range.endOffset; break; }
+    plainOffset += len;
+  }
+  if (startOffset < 0 || endOffset < 0 || endOffset <= startOffset) return null;
+  return { start: startOffset, end: endOffset };
+}
+
+function applyCoding(docId, codeId, start, end) {
+  const p = currentProject();
+  const overlaps = p.codings.filter(c => c.docId === docId && !(c.end <= start || c.start >= end));
+  overlaps.forEach(o => { p.codings = p.codings.filter(c => c.id !== o.id); });
+  p.codings.push({ id: uid('cd'), docId, codeId, start, end, memo: '' });
+  const code = p.codebook.find(c => c.id === codeId);
+  logEvent(p, 'excerpt_coded', `Coded excerpt with "${code ? code.name : codeId}"`);
+  saveState();
+  render();
+}
+
+function addCode() {
+  const input = document.getElementById('newCodeName');
+  const name = input.value.trim();
+  if (!name) return;
+  const parentSelect = document.getElementById('newCodeParent');
+  const parentId = parentSelect && parentSelect.value ? parentSelect.value : null;
+  const p = currentProject();
+  const color = HIGHLIGHT_PALETTE[p.codebook.length % HIGHLIGHT_PALETTE.length].hex;
+  p.codebook.push({ id: uid('code'), name, color, parentId, memo: '' });
+  logEvent(p, 'code_added', parentId ? `Added subtheme "${name}"` : `Added theme "${name}"`);
+  input.value = '';
+  saveState();
+  render();
+}
+
+function openCodeModal(codeId) {
+  const p = currentProject();
+  const code = p.codebook.find(c => c.id === codeId);
+  if (!code) return;
+  state.editingCodeId = codeId;
+  document.getElementById('codeModalName').value = code.name;
+  document.getElementById('codeModalMemo').value = code.memo || '';
+  const select = document.getElementById('codeModalParent');
+  const options = p.codebook.filter(c => c.id !== codeId && !c.parentId).map(c => `<option value="${c.id}">under: ${escape(c.name)}</option>`).join('');
+  select.innerHTML = `<option value="">— top-level theme —</option>${options}`;
+  select.value = code.parentId || '';
+  document.getElementById('codeModal').classList.add('open');
+}
+function closeCodeModal() { document.getElementById('codeModal').classList.remove('open'); }
+function saveCodeModal() {
+  const p = currentProject();
+  const code = p.codebook.find(c => c.id === state.editingCodeId);
+  if (!code) return;
+  const name = document.getElementById('codeModalName').value.trim();
+  if (!name) return;
+  const parentId = document.getElementById('codeModalParent').value || null;
+  const hasChildren = p.codebook.some(c => c.parentId === code.id);
+  if (hasChildren && parentId) {
+    alert("this theme already has subthemes of its own — can't nest it under another theme.");
+    return;
+  }
+  code.name = name;
+  code.memo = document.getElementById('codeModalMemo').value.trim();
+  code.parentId = parentId;
+  logEvent(p, 'code_memo_edited', `Updated details for "${name}"`);
+  saveState();
+  closeCodeModal();
+  render();
+}
+
+function openExcerptModal(codingId) {
+  const p = currentProject();
+  const cd = p.codings.find(c => c.id === codingId);
+  if (!cd) return;
+  state.editingCodingId = codingId;
+  const code = p.codebook.find(c => c.id === cd.codeId);
+  const doc = p.docs.find(d => d.id === cd.docId);
+  document.getElementById('excerptCodeLabel').textContent = code ? code.name : '(deleted code)';
+  const preview = doc && doc.kind === 'media' ? `${formatTime(cd.start)} – ${formatTime(cd.end)}` : (doc ? doc.text.slice(cd.start, cd.end) : '');
+  document.getElementById('excerptPreview').textContent = preview;
+  document.getElementById('excerptMemo').value = cd.memo || '';
+  document.getElementById('excerptModal').classList.add('open');
+}
+function closeExcerptModal() { document.getElementById('excerptModal').classList.remove('open'); }
+function saveExcerptModal() {
+  const p = currentProject();
+  const cd = p.codings.find(c => c.id === state.editingCodingId);
+  if (!cd) return;
+  cd.memo = document.getElementById('excerptMemo').value.trim();
+  logEvent(p, 'excerpt_memo_edited', 'Added a memo to a coded excerpt');
+  saveState();
+  closeExcerptModal();
+  render();
+}
+function removeExcerptCoding() {
+  const p = currentProject();
+  const cd = p.codings.find(c => c.id === state.editingCodingId);
+  if (!cd) return;
+  if (!confirm('remove this coding?')) return;
+  const code = p.codebook.find(c => c.id === cd.codeId);
+  p.codings = p.codings.filter(c => c.id !== cd.id);
+  logEvent(p, 'excerpt_uncoded', `Removed coding "${code ? code.name : cd.codeId}"`);
+  saveState();
+  closeExcerptModal();
+  render();
+}
+
+function setDocKind(kind) {
+  state.newDocKind = kind;
+  document.getElementById('docKindTextBtn').classList.toggle('active', kind === 'text');
+  document.getElementById('docKindMediaBtn').classList.toggle('active', kind === 'media');
+  document.getElementById('docTextFields').style.display = kind === 'text' ? '' : 'none';
+  document.getElementById('docMediaFields').style.display = kind === 'media' ? '' : 'none';
+}
+function openDocModal() {
+  document.getElementById('docName').value = '';
+  document.getElementById('docText').value = '';
+  document.getElementById('docFile').value = '';
+  document.getElementById('docMediaFile').value = '';
+  setDocKind('text');
+  document.getElementById('docKindTextBtn').onclick = () => setDocKind('text');
+  document.getElementById('docKindMediaBtn').onclick = () => setDocKind('media');
+  document.getElementById('docModal').classList.add('open');
+  document.getElementById('docFile').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!document.getElementById('docName').value) {
+      document.getElementById('docName').value = file.name.replace(/\.[^.]+$/, '');
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => { document.getElementById('docText').value = ev.target.result; };
+    reader.readAsText(file);
+  };
+  document.getElementById('docMediaFile').onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!document.getElementById('docName').value) {
+      document.getElementById('docName').value = file.name.replace(/\.[^.]+$/, '');
+    }
+  };
+}
+function closeDocModal() { document.getElementById('docModal').classList.remove('open'); }
+function saveDoc() {
+  const name = document.getElementById('docName').value.trim() || 'Untitled document';
+  const p = currentProject();
+  if (state.newDocKind === 'media') {
+    const fileInput = document.getElementById('docMediaFile');
+    const file = fileInput.files[0];
+    if (!file) return;
+    const mediaKey = uid('media');
+    mediaPut(mediaKey, file).then(() => {
+      const doc = { id: uid('doc'), name, kind: 'media', mediaKey, mediaType: file.type, mediaName: file.name, createdAt: Date.now() };
+      p.docs.push(doc);
+      state.currentDocId = doc.id;
+      logEvent(p, 'doc_added', `Added media document "${name}"`);
+      saveState();
+      closeDocModal();
+      render();
+    });
+    return;
+  }
+  const text = document.getElementById('docText').value;
+  if (!text.trim()) return;
+  const doc = { id: uid('doc'), name, kind: 'text', text, createdAt: Date.now() };
+  p.docs.push(doc);
+  state.currentDocId = doc.id;
+  logEvent(p, 'doc_added', `Added text document "${name}"`);
+  saveState();
+  closeDocModal();
+  render();
+}
+function deleteDoc(id) {
+  if (!confirm('delete this document and all its codings?')) return;
+  const p = currentProject();
+  const doc = p.docs.find(d => d.id === id);
+  if (doc && doc.kind === 'media' && doc.mediaKey) mediaDelete(doc.mediaKey);
+  p.docs = p.docs.filter(d => d.id !== id);
+  p.codings = p.codings.filter(c => c.docId !== id);
+  if (state.currentDocId === id) state.currentDocId = p.docs[0]?.id || null;
+  logEvent(p, 'doc_deleted', `Deleted document "${doc ? doc.name : id}"`);
+  saveState();
+  render();
+}
+
+function renderLibrary() {
+  const links = state.library.map(l => `
+    <div class="link-card">
+      <button class="link-delete" data-del-link="${l.id}">×</button>
+      <h4>${escape(l.title)}</h4>
+      <a href="${escape(l.url)}" target="_blank" rel="noopener">${escape(l.url)}</a>
+      ${l.notes ? `<p>${escape(l.notes)}</p>` : ''}
+      <div class="link-meta">
+        <span>${escape(l.tag || 'saved')}</span>
+        <span>${new Date(l.createdAt).toLocaleDateString()}</span>
+      </div>
+    </div>
+  `).join('');
+  return `
+    <div class="add-link-panel">
+      <div class="field">
+        <label>title ♡</label>
+        <input type="text" id="linkTitle" placeholder="paper or resource name">
+      </div>
+      <div class="field">
+        <label>url ♡</label>
+        <input type="text" id="linkUrl" placeholder="https://...">
+      </div>
+      <div>
+        <button class="btn" onclick="addLink()">✿ save</button>
+      </div>
+      <div class="field" style="grid-column: 1 / -1;">
+        <label>notes (why does this matter to you?)</label>
+        <input type="text" id="linkNotes" placeholder="key quote, tag, or why you saved it...">
+      </div>
+    </div>
+    ${state.library.length ? `<div class="library-grid">${links}</div>` : `
+      <div class="empty-state">
+        <div class="doodle">♡</div>
+        <h2>your library is waiting</h2>
+        <p>paste research papers, articles, or reference URLs above to build a little collection of things worth remembering.</p>
+      </div>
+    `}
+  `;
+}
+
+function attachLibraryEvents() {
+  document.querySelectorAll('[data-del-link]').forEach(btn => {
+    btn.onclick = () => {
+      state.library = state.library.filter(l => l.id !== btn.dataset.delLink);
+      saveState();
+      render();
+    };
+  });
+}
+
+function addLink() {
+  const title = document.getElementById('linkTitle').value.trim();
+  const url = document.getElementById('linkUrl').value.trim();
+  const notes = document.getElementById('linkNotes').value.trim();
+  if (!title || !url) return;
+  state.library.unshift({ id: uid('link'), title, url, notes, tag: '', createdAt: Date.now() });
+  saveState();
+  render();
+}
+
+function renderAnalysis(p) {
+  const codeFreq = p.codebook.map(code => ({
+    label: code.name,
+    color: code.color,
+    value: p.codings.filter(cd => cd.codeId === code.id).length,
+  })).sort((a,b) => b.value - a.value);
+  const maxCode = Math.max(1, ...codeFreq.map(c => c.value));
+  const codeFreqChart = codeFreq.length ? `
+    <div class="chart-card">
+      <div class="chart-title">code frequency<small>across all documents</small></div>
+      <div class="bar-chart code-freq-chart">
+        ${codeFreq.map(c => `
+          <div class="bar-row">
+            <div class="bar-label" title="${escape(c.label)}">${escape(c.label)}</div>
+            <div class="bar-track"><div class="bar-fill" style="--fill-color:${c.color}; width:${(c.value/maxCode)*100}%"></div></div>
+            <div class="bar-value">${c.value}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const cardStatus = p.boards.map(b => ({
+    label: b.name,
+    value: b.cards.length,
+  }));
+  const maxCard = Math.max(1, ...cardStatus.map(c => c.value));
+  const cardChart = `
+    <div class="chart-card">
+      <div class="chart-title">project momentum<small>cards by board</small></div>
+      <div class="bar-chart">
+        ${cardStatus.map(c => `
+          <div class="bar-row">
+            <div class="bar-label">${escape(c.label)}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(c.value/maxCard)*100}%"></div></div>
+            <div class="bar-value">${c.value}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  const docCoverage = p.docs.filter(d => d.kind !== 'media').map(d => {
+    const codings = p.codings.filter(c => c.docId === d.id);
+    const covered = codings.reduce((sum, c) => sum + (c.end - c.start), 0);
+    const pct = d.text.length ? Math.round((covered / d.text.length) * 100) : 0;
+    return { label: d.name, value: pct, count: codings.length };
+  });
+  const docChart = docCoverage.length ? `
+    <div class="chart-card">
+      <div class="chart-title">document coverage<small>% of text coded</small></div>
+      <div class="bar-chart">
+        ${docCoverage.map(c => `
+          <div class="bar-row">
+            <div class="bar-label" title="${escape(c.label)}">${escape(c.label)}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${c.value}%"></div></div>
+            <div class="bar-value">${c.value}%</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  let surveyBody = '';
+  if (state.csvData) {
+    surveyBody = renderCsvAnalysis(state.csvData);
+  } else {
+    surveyBody = `
+      <div class="csv-drop" id="csvDrop">
+        <div class="csv-drop-icon">✿ drop it here ✿</div>
+        <div style="font-size: 14px; margin-bottom: 4px; color: var(--ink-soft); font-weight: 600;">or click to upload your CSV</div>
+        <div style="font-size: 12px;">survey exports, quantitative data, structured responses</div>
+        <input type="file" id="csvFile" accept=".csv" style="display:none;">
+      </div>
+    `;
+  }
+
+  return `
+    <div class="analysis-section">
+      <div class="eyebrow">the qualitative pretties</div>
+      <h2>coding patterns</h2>
+      <p class="section-desc">how your codes are showing up across documents. watch which ones dominate, which are sparse, and where you might want to dig deeper.</p>
+      <div class="chart-grid">
+        ${codeFreqChart}
+        ${docChart}
+        ${cardChart}
+      </div>
+    </div>
+    <div class="analysis-section">
+      <div class="eyebrow">the quantitative pretties</div>
+      <h2>survey analysis</h2>
+      <p class="section-desc">upload a CSV and i'll turn each column into a chart automatically. numeric columns get histograms; categorical columns get frequency bars.</p>
+      ${surveyBody}
+    </div>
+  `;
+}
+
+function attachAnalysisEvents() {
+  const drop = document.getElementById('csvDrop');
+  const fileInput = document.getElementById('csvFile');
+  if (drop && fileInput) {
+    drop.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => handleCsvFile(e.target.files[0]);
+    ['dragenter', 'dragover'].forEach(evt => drop.addEventListener(evt, e => {
+      e.preventDefault(); drop.classList.add('dragover');
+    }));
+    ['dragleave', 'drop'].forEach(evt => drop.addEventListener(evt, e => {
+      e.preventDefault(); drop.classList.remove('dragover');
+    }));
+    drop.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file) handleCsvFile(file);
+    });
+  }
+  const clearBtn = document.getElementById('clearCsv');
+  if (clearBtn) clearBtn.onclick = () => { state.csvData = null; state.csvName = null; render(); };
+}
+
+function handleCsvFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const parsed = parseCSV(e.target.result);
+    state.csvData = parsed;
+    state.csvName = file.name;
+    render();
+  };
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return null;
+  const parseLine = (line) => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+        else inQuotes = !inQuotes;
+      } else if (c === ',' && !inQuotes) {
+        result.push(current); current = '';
+      } else { current += c; }
+    }
+    result.push(current);
+    return result;
+  };
+  const headers = parseLine(lines[0]);
+  const rows = lines.slice(1).map(parseLine);
+  return { headers, rows };
+}
+
+function renderCsvAnalysis(csv) {
+  const columns = csv.headers.map((h, i) => {
+    const values = csv.rows.map(r => (r[i] || '').trim()).filter(v => v !== '');
+    const numericValues = values.map(v => parseFloat(v)).filter(v => !isNaN(v));
+    const isNumeric = numericValues.length > values.length * 0.7 && numericValues.length > 0;
+    return { name: h, values, numericValues, isNumeric };
+  });
+  const charts = columns.map(col => {
+    if (col.isNumeric) {
+      const min = Math.min(...col.numericValues);
+      const max = Math.max(...col.numericValues);
+      const bins = 6;
+      const step = (max - min) / bins || 1;
+      const buckets = Array(bins).fill(0).map((_, i) => ({
+        label: `${(min + i*step).toFixed(1)}–${(min + (i+1)*step).toFixed(1)}`,
+        value: 0,
+      }));
+      col.numericValues.forEach(v => {
+        let idx = Math.floor((v - min) / step);
+        if (idx >= bins) idx = bins - 1;
+        buckets[idx].value++;
+      });
+      const maxV = Math.max(1, ...buckets.map(b => b.value));
+      const mean = (col.numericValues.reduce((a,b) => a+b, 0) / col.numericValues.length).toFixed(2);
+      return `
+        <div class="chart-card">
+          <div class="chart-title">${escape(col.name)}<small>numeric · n=${col.numericValues.length} · mean ${mean}</small></div>
+          <div class="bar-chart">
+            ${buckets.map(b => `
+              <div class="bar-row">
+                <div class="bar-label">${b.label}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(b.value/maxV)*100}%"></div></div>
+                <div class="bar-value">${b.value}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      const freq = {};
+      col.values.forEach(v => { freq[v] = (freq[v] || 0) + 1; });
+      const sorted = Object.entries(freq).sort((a,b) => b[1] - a[1]).slice(0, 10);
+      const maxV = Math.max(1, ...sorted.map(s => s[1]));
+      return `
+        <div class="chart-card">
+          <div class="chart-title">${escape(col.name)}<small>categorical · ${Object.keys(freq).length} unique · n=${col.values.length}</small></div>
+          <div class="bar-chart">
+            ${sorted.map(([label, val]) => `
+              <div class="bar-row">
+                <div class="bar-label" title="${escape(label)}">${escape(label)}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${(val/maxV)*100}%"></div></div>
+                <div class="bar-value">${val}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:13px; color:var(--ink-soft); font-weight:600;">
+      <span>✿ ${escape(state.csvName)} · ${csv.rows.length} rows · ${csv.headers.length} columns</span>
+      <button class="btn btn-secondary" id="clearCsv" style="padding:6px 14px; font-size:12px;">clear</button>
+    </div>
+    <div class="chart-grid">${charts}</div>
+  `;
+}
+
+function renderAssistant() {
+  const p = currentProject();
+  const codingSummary = p.codings.length
+    ? `${p.codings.length} coded bits · ${p.codebook.length} codes`
+    : 'no coded data yet';
+  const messages = state.aiHistory.map(m => `
+    <div class="msg ${m.role}">${escape(m.content)}</div>
+  `).join('');
+  return `
+    <div class="ai-panel">
+      <div class="ai-header">
+        <h2>research bestie</h2>
+        <div class="ai-context">✿ ${escape(p.name)} · ${codingSummary}</div>
+      </div>
+      <div class="ai-messages" id="aiMessages">
+        ${messages || `
+          <div class="ai-empty">
+            hi! ✿ i can see your project — cards, codes, coded excerpts, saved links.<br>
+            ask me to summarize themes, spot patterns, draft a memo, whatever you need!
+          </div>
+        `}
+      </div>
+      <div>
+        <div class="ai-suggestions">
+          <button class="suggestion-chip" data-prompt="Summarize the coded themes across all my documents.">✿ summarize themes</button>
+          <button class="suggestion-chip" data-prompt="Identify contradictions or tensions in my coded data.">♡ find tensions</button>
+          <button class="suggestion-chip" data-prompt="Draft a research memo based on my current codings.">✎ draft a memo</button>
+          <button class="suggestion-chip" data-prompt="What patterns emerge from my code frequencies?">◐ patterns</button>
+          <button class="suggestion-chip" data-prompt="Suggest next steps for my research.">→ next steps</button>
+        </div>
+        <div class="ai-input-row">
+          <textarea class="ai-input" id="aiInput" placeholder="ask about your data, request a summary, draft something..." rows="1"></textarea>
+          <button class="btn" id="aiSend">send ✿</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function attachAssistantEvents() {
+  const input = document.getElementById('aiInput');
+  const send = document.getElementById('aiSend');
+  if (!input || !send) return;
+  const doSend = async () => {
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    await askAI(text);
+  };
+  send.onclick = doSend;
+  input.onkeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
+  };
+  input.oninput = () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(130, input.scrollHeight) + 'px';
+  };
+  document.querySelectorAll('.suggestion-chip').forEach(chip => {
+    chip.onclick = () => { input.value = chip.dataset.prompt; input.focus(); };
+  });
+  const msgs = document.getElementById('aiMessages');
+  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function askAI(userMsg) {
+  state.aiHistory.push({ role: 'user', content: userMsg });
+  render();
+  const p = currentProject();
+  const contextBlock = buildAIContext(p);
+  const msgs = document.getElementById('aiMessages');
+  if (msgs) {
+    const thinking = document.createElement('div');
+    thinking.className = 'msg ai thinking';
+    thinking.id = 'thinkingMsg';
+    thinking.textContent = 'thinking... ✿';
+    msgs.appendChild(thinking);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/super-action`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        system: `You are a warm, whimsical research assistant embedded in a UX/HCI/serious-games researcher's workspace. You have access to their current project's data. Be direct, insightful, and specific — but keep a light, personable tone. When summarizing, ground observations in the actual coded excerpts. When drafting memos, use appropriate academic register. When identifying patterns, note both what's present and what's absent. Never invent data — work only with what's given. Format responses cleanly with short paragraphs and occasional bullet points. Feel free to use an ✿ or ♡ sparingly when it fits the warmth of the tone.`,
+        messages: [
+          ...state.aiHistory.slice(-8).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content })),
+          { role: 'user', content: `Here is the current project context:\n\n${contextBlock}\n\nMy question: ${userMsg}` }
+        ],
+      }),
+    });
+    const data = await response.json();
+    const reply = data.text || data.error || 'hmm, no response came back. try again?';
+    state.aiHistory.push({ role: 'ai', content: reply });
+  } catch (err) {
+    state.aiHistory.push({ role: 'ai', content: 'something went wrong reaching me. check your connection and try again?\n\n(error: ' + err.message + ')' });
+  }
+  const thinkingEl = document.getElementById('thinkingMsg');
+  if (thinkingEl) thinkingEl.remove();
+  saveState();
+  render();
+}
+
+function buildAIContext(p) {
+  let ctx = `PROJECT: ${p.name}\n\n`;
+  const totalCards = p.boards.reduce((sum, b) => sum + b.cards.length, 0);
+  ctx += `BOARDS (${p.boards.length}) · CARDS (${totalCards}):\n`;
+  p.boards.forEach(board => {
+    ctx += `Board: ${board.name}\n`;
+    board.columns.forEach(col => {
+      const cards = board.cards.filter(c => c.columnId === col.id);
+      if (cards.length) {
+        ctx += `  [${col.name}]\n`;
+        cards.forEach(c => { ctx += `    • ${c.title}${c.notes ? ' — ' + c.notes : ''}\n`; });
+      }
+    });
+  });
+  ctx += `\nCODEBOOK (${p.codebook.length} codes):\n`;
+  p.codebook.forEach(code => {
+    const count = p.codings.filter(cd => cd.codeId === code.id).length;
+    ctx += `  • ${code.name} (${count} excerpts)\n`;
+  });
+  ctx += `\nCODED EXCERPTS:\n`;
+  p.codings.slice(0, 40).forEach(cd => {
+    const code = p.codebook.find(c => c.id === cd.codeId);
+    const doc = p.docs.find(d => d.id === cd.docId);
+    if (code && doc) {
+      const excerpt = doc.kind === 'media' ? `[${doc.name} ${formatTime(cd.start)}-${formatTime(cd.end)}]` : doc.text.slice(cd.start, cd.end);
+      ctx += `  [${code.name}] "${excerpt}"\n`;
+    }
+  });
+  if (p.codings.length > 40) ctx += `  ... and ${p.codings.length - 40} more excerpts.\n`;
+  if (state.library.length) {
+    ctx += `\nSAVED LIBRARY (${state.library.length}):\n`;
+    state.library.slice(0, 15).forEach(l => {
+      ctx += `  • ${l.title}${l.notes ? ' — ' + l.notes : ''}\n`;
+    });
+  }
+  return ctx;
+}
+
+function generateCodebookAppendix(p) {
+  let out = `CODEBOOK APPENDIX — ${p.name}\n`;
+  out += `Generated ${new Date().toLocaleString()}\n\n`;
+  const topLevel = p.codebook.filter(c => !c.parentId);
+  if (!topLevel.length) return out + '(no codes yet)\n';
+  topLevel.forEach(code => {
+    const count = p.codings.filter(cd => cd.codeId === code.id).length;
+    out += `${code.name} (${count} excerpts)\n`;
+    if (code.memo) out += `  Definition: ${code.memo}\n`;
+    const children = p.codebook.filter(c => c.parentId === code.id);
+    children.forEach(ch => {
+      const chCount = p.codings.filter(cd => cd.codeId === ch.id).length;
+      out += `  - ${ch.name} (${chCount} excerpts)\n`;
+      if (ch.memo) out += `      Definition: ${ch.memo}\n`;
+    });
+    out += '\n';
+  });
+  return out;
+}
+
+function generateMethodsDraft(p) {
+  const textDocs = p.docs.filter(d => d.kind !== 'media').length;
+  const mediaDocs = p.docs.filter(d => d.kind === 'media').length;
+  const topLevel = p.codebook.filter(c => !c.parentId).length;
+  const subthemes = p.codebook.filter(c => c.parentId).length;
+  const codesWithMemo = p.codebook.filter(c => c.memo && c.memo.trim()).length;
+  const excerptsWithMemo = p.codings.filter(c => c.memo && c.memo.trim()).length;
+  const log = p.auditLog || [];
+  const dates = log.map(e => e.ts).sort((a, b) => a - b);
+  const dateRange = dates.length ? ` between ${new Date(dates[0]).toLocaleDateString()} and ${new Date(dates[dates.length - 1]).toLocaleDateString()}` : '';
+
+  let out = `Data for this study were organized and inductively coded using Fieldnote, a custom qualitative analysis workspace. `;
+  out += `A total of ${p.docs.length} document${p.docs.length === 1 ? '' : 's'} ${p.docs.length === 1 ? 'was' : 'were'} analyzed`;
+  if (mediaDocs) out += ` (${textDocs} text document${textDocs === 1 ? '' : 's'} and ${mediaDocs} audio/video recording${mediaDocs === 1 ? '' : 's'})`;
+  out += `. Coding was conducted inductively, yielding a codebook of ${p.codebook.length} code${p.codebook.length === 1 ? '' : 's'}`;
+  if (subthemes) out += ` organized into ${topLevel} theme${topLevel === 1 ? '' : 's'} and ${subthemes} subtheme${subthemes === 1 ? '' : 's'} (axial coding)`;
+  out += `, applied across ${p.codings.length} coded excerpt${p.codings.length === 1 ? '' : 's'}. `;
+  if (codesWithMemo || excerptsWithMemo) {
+    out += `Analytic memos were maintained`;
+    if (codesWithMemo) out += ` for ${codesWithMemo} of ${p.codebook.length} codes (documenting definitions and boundaries)`;
+    if (codesWithMemo && excerptsWithMemo) out += ` and`;
+    if (excerptsWithMemo) out += ` for ${excerptsWithMemo} individual coded excerpt${excerptsWithMemo === 1 ? '' : 's'}`;
+    out += `, supporting transparency and reflexivity throughout analysis. `;
+  }
+  out += `A full audit trail of ${log.length} coding action${log.length === 1 ? '' : 's'} was retained${dateRange} to support methodological transparency. `;
+  out += `[Insert additional detail on sampling, inter-rater reliability procedures, or theoretical framework as appropriate.]`;
+  return out;
+}
+
+function exportFullJSON(p) {
+  const data = JSON.parse(JSON.stringify(p));
+  downloadText(`${slugify(p.name)}_fieldnote_export.json`, JSON.stringify(data, null, 2), 'application/json');
+}
+
+function renderExport(p) {
+  const log = (p.auditLog || []).slice().reverse();
+  const auditHtml = log.length ? log.map(e => `
+    <div class="audit-item">${escape(e.detail)}<span class="audit-time">${new Date(e.ts).toLocaleString()}</span></div>
+  `).join('') : '<div style="font-size:13px;color:var(--ink-mute);font-style:italic;">nothing logged yet — start coding to build your audit trail</div>';
+
+  return `
+    <div class="export-grid">
+      <div class="export-card">
+        <h3>full data export</h3>
+        <p>everything in this project — boards, docs, codebook, codings, memos — as JSON. media files themselves live in your browser's storage and aren't included in this file.</p>
+        <button class="btn" id="exportJsonBtn" style="margin-top:auto;">⇩ download JSON</button>
+      </div>
+      <div class="export-card">
+        <h3>codebook appendix</h3>
+        <p>your codebook formatted for a paper appendix — themes, subthemes, definitions, and excerpt counts.</p>
+        <div class="export-preview">${escape(generateCodebookAppendix(p))}</div>
+        <button class="btn" id="exportCodebookBtn" style="margin-top:auto;">⇩ download .txt</button>
+      </div>
+      <div class="export-card">
+        <h3>methods section draft</h3>
+        <p>a starting paragraph describing your coding process, generated from your actual project data.</p>
+        <div class="export-preview">${escape(generateMethodsDraft(p))}</div>
+        <button class="btn" id="exportMethodsBtn" style="margin-top:auto;">⇩ download .txt</button>
+      </div>
+      <div class="export-card">
+        <h3>audit trail</h3>
+        <p>a timestamped log of every code and coding decision — your "show your work" record.</p>
+        <div class="audit-list">${auditHtml}</div>
+        <button class="btn" id="exportAuditBtn" style="margin-top:14px;">⇩ download .txt</button>
+      </div>
+    </div>
+  `;
+}
+
+function attachExportEvents() {
+  const p = currentProject();
+  const jsonBtn = document.getElementById('exportJsonBtn');
+  if (jsonBtn) jsonBtn.onclick = () => exportFullJSON(p);
+  const codebookBtn = document.getElementById('exportCodebookBtn');
+  if (codebookBtn) codebookBtn.onclick = () => downloadText(`${slugify(p.name)}_codebook_appendix.txt`, generateCodebookAppendix(p));
+  const methodsBtn = document.getElementById('exportMethodsBtn');
+  if (methodsBtn) methodsBtn.onclick = () => downloadText(`${slugify(p.name)}_methods_draft.txt`, generateMethodsDraft(p));
+  const auditBtn = document.getElementById('exportAuditBtn');
+  if (auditBtn) {
+    auditBtn.onclick = () => {
+      const log = p.auditLog || [];
+      const lines = log.map(e => `${new Date(e.ts).toISOString()}\t${e.type}\t${e.detail}`);
+      downloadText(`${slugify(p.name)}_audit_trail.txt`, `AUDIT TRAIL — ${p.name}\n\n` + (lines.join('\n') || '(no events logged yet)'));
+    };
+  }
+}
+
+function attachViewEvents() {
+  if (state.currentView === 'projects') attachProjectsEvents();
+  else if (state.currentView === 'board') attachBoardEvents();
+  else if (state.currentView === 'coding') attachCodingEvents();
+  else if (state.currentView === 'library') attachLibraryEvents();
+  else if (state.currentView === 'analysis') attachAnalysisEvents();
+  else if (state.currentView === 'assistant') attachAssistantEvents();
+  else if (state.currentView === 'export') attachExportEvents();
+}
+
+function showAuthScreen(show) {
+  document.getElementById('authScreen').style.display = show ? 'flex' : 'none';
+  document.getElementById('app').style.display = show ? 'none' : 'grid';
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('authSignInBtn').textContent = mode === 'signin' ? '✿ sign in' : '✿ create account';
+  document.getElementById('authSwitchToSignUp').textContent = mode === 'signin' ? 'new here? create an account' : 'already have an account? sign in';
+  document.getElementById('authError').textContent = '';
+}
+
+async function handleAuthSubmit() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+  errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'enter an email and password ✿'; return; }
+  const btn = document.getElementById('authSignInBtn');
+  btn.disabled = true;
+  try {
+    if (authMode === 'signin') {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      supabaseUser = data.user;
+      await startApp();
+    } else {
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.session) {
+        supabaseUser = data.user;
+        await startApp();
+      } else {
+        errEl.textContent = 'account created — check your email to confirm, then sign in ✿';
+        setAuthMode('signin');
+      }
+    }
+  } catch (e) {
+    errEl.textContent = e.message || 'something went wrong';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleSignOut() {
+  if (!confirm('sign out?')) return;
+  await supabaseClient.auth.signOut();
+  supabaseUser = null;
+  location.reload();
+}
+
+async function startApp() {
+  await loadState();
+  showAuthScreen(false);
+  render();
+}
+
+(async () => {
+  document.getElementById('authSignInBtn').onclick = handleAuthSubmit;
+  document.getElementById('authSwitchToSignUp').onclick = () => setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+  document.getElementById('authPassword').onkeydown = (e) => { if (e.key === 'Enter') handleAuthSubmit(); };
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session && session.user) {
+    supabaseUser = session.user;
+    await startApp();
+  } else {
+    showAuthScreen(true);
+  }
+})();
+
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); });
+});
+</script>
+
+</body>
+</html>
